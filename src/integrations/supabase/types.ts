@@ -14,7 +14,114 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      product_tiers: {
+        Row: {
+          id: string
+          product_id: string | null
+          tier_id: string | null
+        }
+        Insert: {
+          id?: string
+          product_id?: string | null
+          tier_id?: string | null
+        }
+        Update: {
+          id?: string
+          product_id?: string | null
+          tier_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_tiers_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_tiers_tier_id_fkey"
+            columns: ["tier_id"]
+            isOneToOne: false
+            referencedRelation: "tiers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          avg_ticket: number | null
+          created_at: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          internal_notes: string | null
+          name: string
+          position_index: number | null
+          scope_items: string[] | null
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          avg_ticket?: number | null
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          internal_notes?: string | null
+          name: string
+          position_index?: number | null
+          scope_items?: string[] | null
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          avg_ticket?: number | null
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          internal_notes?: string | null
+          name?: string
+          position_index?: number | null
+          scope_items?: string[] | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      tiers: {
+        Row: {
+          color: string | null
+          created_at: string | null
+          id: string
+          label: string
+          max_revenue: number | null
+          min_revenue: number | null
+          name: string
+          order_index: number
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string | null
+          id?: string
+          label: string
+          max_revenue?: number | null
+          min_revenue?: number | null
+          name: string
+          order_index: number
+        }
+        Update: {
+          color?: string | null
+          created_at?: string | null
+          id?: string
+          label?: string
+          max_revenue?: number | null
+          min_revenue?: number | null
+          name?: string
+          order_index?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
