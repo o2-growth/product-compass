@@ -89,19 +89,26 @@ function DraggableCard({
         <X className="h-3 w-3" />
       </button>
 
-      {/* Botão "abrir" cobre todo o card exceto os handles */}
+      {/* Botão "abrir" cobre só área do ícone/chevron — não cobre o nome editável */}
       <button
         type="button"
         onClick={() => onOpen(product.id)}
-        className="absolute inset-0 flex cursor-pointer flex-col p-1.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
+        className="absolute inset-0 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
         aria-label={`Abrir ${product.name}`}
-      >
+      />
+      <div className="pointer-events-none relative flex h-full flex-col p-1.5">
         <div className="ml-3.5 mt-0.5 text-base leading-none">{product.icon || "📦"}</div>
-        <div className="mt-1 line-clamp-3 text-[10px] font-semibold leading-tight text-neutral-900">
-          {product.name}
+        <div className="pointer-events-auto mt-1 text-[10px] font-semibold leading-tight text-neutral-900">
+          <EditableText
+            value={product.name}
+            onSave={(name) => rename.mutateAsync({ id: product.id, name })}
+            ariaLabel="Renomear produto"
+            className="block w-full"
+            inputClassName="text-[10px] font-semibold"
+          />
         </div>
         <ChevronRight className="absolute bottom-1 right-1 h-3 w-3 text-neutral-800 opacity-0 transition-opacity duration-150 group-hover:opacity-90" />
-      </button>
+      </div>
     </div>
   );
 }
