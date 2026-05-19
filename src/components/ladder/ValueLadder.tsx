@@ -107,15 +107,25 @@ export function ValueLadder() {
                 Nenhum produto classificado nesta trilha.
               </div>
             ) : (
-              groups.map((g, i) => (
-                <LadderStep
-                  key={g.name}
-                  group={g}
-                  stepIndex={i}
-                  totalSteps={groups.length}
-                  track={track}
-                />
-              ))
+              (() => {
+                const lefts = getStepLefts(groups);
+                const last = groups[groups.length - 1];
+                const totalWidth =
+                  lefts[lefts.length - 1] + getStepWidth(last.products.length) + 40;
+                return (
+                  <div className="relative h-full" style={{ minWidth: totalWidth }}>
+                    {groups.map((g, i) => (
+                      <LadderStep
+                        key={g.name}
+                        group={g}
+                        leftPx={lefts[i]}
+                        stepIndex={i}
+                        track={track}
+                      />
+                    ))}
+                  </div>
+                );
+              })()
             )}
           </div>
         </div>
