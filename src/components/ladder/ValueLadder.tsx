@@ -17,6 +17,7 @@ import {
 } from "@/hooks/useScale";
 import { ProductDrawer } from "@/components/scale/ProductDrawer";
 import { LadderStep, getStepLefts, getStepWidth, STEP_DELTA_Y } from "./LadderStep";
+import { ProductsSidebar } from "./ProductsSidebar";
 
 type DrawerMode = "create" | "edit" | null;
 
