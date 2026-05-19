@@ -79,29 +79,51 @@ async function syncTiers(productId: string, tierIds: string[]) {
   if (error) throw error;
 }
 
+function isMissingColumn(err: any, col: string) {
+  if (!err) return false;
+  const msg = (err.message ?? "") + " " + (err.hint ?? "");
+  return (
+    err.code === "PGRST204" ||
+    err.code === "42703" ||
+    new RegExp(`column .*${col}|'${col}'`, "i").test(msg)
+  );
+}
+
 export function useCreateProduct() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (form: ProductFormData) => {
-      const { data, error } = await supabase
+      const base: any = {
+        name: form.name,
+        description: form.description || null,
+        scope_items: form.scope_items,
+        avg_ticket: form.avg_ticket,
+        status: form.status,
+        icon: form.icon || "📦",
+        internal_notes: form.internal_notes || null,
+        ladder_track: form.ladder_track,
+        ladder_group: form.ladder_group || null,
+        ladder_order: form.ladder_order ?? 0,
+        created_by: form.created_by || null,
+      };
+      let { data, error } = await supabase
         .from("products")
-        .insert({
-          name: form.name,
-          description: form.description || null,
-          scope_items: form.scope_items,
-          avg_ticket: form.avg_ticket,
-          status: form.status,
-          icon: form.icon || "📦",
-          internal_notes: form.internal_notes || null,
-          ladder_track: form.ladder_track,
-          ladder_group: form.ladder_group || null,
-          ladder_order: form.ladder_order ?? 0,
-          created_by: form.created_by || null,
-        })
+        .insert(base)
         .select()
         .single();
+      // Retry sem created_by se a coluna ainda não existe no schema
+      if (error && isMissingColumn(error, "created_by")) {
+        const { created_by, ...withoutCreatedBy } = base;
+        const retry = await supabase
+          .from("products")
+          .insert(withoutCreatedBy)
+          .select()
+          .single();
+        data = retry.data;
+        error = retry.error;
+      }
       if (error) throw error;
-      await syncTiers(data.id, form.tier_ids);
+      await syncTiers(data!.id, form.tier_ids);
       return data;
     },
     onSuccess: () => {
@@ -123,22 +145,28 @@ export function useUpdateProduct() {
       id: string;
       form: ProductFormData;
     }) => {
-      const { error } = await supabase
-        .from("products")
-        .update({
-          name: form.name,
-          description: form.description || null,
-          scope_items: form.scope_items,
-          avg_ticket: form.avg_ticket,
-          status: form.status,
-          icon: form.icon || "📦",
-          internal_notes: form.internal_notes || null,
-          ladder_track: form.ladder_track,
-          ladder_group: form.ladder_group || null,
-          ladder_order: form.ladder_order ?? 0,
-          created_by: form.created_by || null,
-        })
-        .eq("id", id);
+      const base: any = {
+        name: form.name,
+        description: form.description || null,
+        scope_items: form.scope_items,
+        avg_ticket: form.avg_ticket,
+        status: form.status,
+        icon: form.icon || "📦",
+        internal_notes: form.internal_notes || null,
+        ladder_track: form.ladder_track,
+        ladder_group: form.ladder_group || null,
+        ladder_order: form.ladder_order ?? 0,
+        created_by: form.created_by || null,
+      };
+      let { error } = await supabase.from("products").update(base).eq("id", id);
+      if (error && isMissingColumn(error, "created_by")) {
+        const { created_by, ...withoutCreatedBy } = base;
+        const retry = await supabase
+          .from("products")
+          .update(withoutCreatedBy)
+          .eq("id", id);
+        error = retry.error;
+      }
       if (error) throw error;
       await syncTiers(id, form.tier_ids);
     },
