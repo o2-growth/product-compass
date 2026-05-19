@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLadder, TRACK_TITLE, type LadderTrack } from "@/hooks/useLadder";
-import { LadderStep } from "./LadderStep";
+import { LadderStep, getStepLefts, getStepWidth } from "./LadderStep";
 
 export function ValueLadder() {
   const [track, setTrack] = useState<LadderTrack>("b2b");
@@ -49,7 +49,7 @@ export function ValueLadder() {
       {/* Canvas */}
       <main className="relative flex-1 overflow-auto">
         <div
-          className="relative mx-auto h-full min-h-[800px] w-full min-w-[1400px]"
+          className="relative mx-auto h-full min-h-[800px] w-full min-w-[1700px]"
           style={{
             backgroundImage:
               "linear-gradient(to right, rgba(0,0,0,0.045) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.045) 1px, transparent 1px)",
@@ -107,15 +107,25 @@ export function ValueLadder() {
                 Nenhum produto classificado nesta trilha.
               </div>
             ) : (
-              groups.map((g, i) => (
-                <LadderStep
-                  key={g.name}
-                  group={g}
-                  stepIndex={i}
-                  totalSteps={groups.length}
-                  track={track}
-                />
-              ))
+              (() => {
+                const lefts = getStepLefts(groups);
+                const last = groups[groups.length - 1];
+                const totalWidth =
+                  lefts[lefts.length - 1] + getStepWidth(last.products.length) + 40;
+                return (
+                  <div className="relative h-full" style={{ minWidth: totalWidth }}>
+                    {groups.map((g, i) => (
+                      <LadderStep
+                        key={g.name}
+                        group={g}
+                        leftPx={lefts[i]}
+                        stepIndex={i}
+                        track={track}
+                      />
+                    ))}
+                  </div>
+                );
+              })()
             )}
           </div>
         </div>
