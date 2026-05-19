@@ -4,6 +4,8 @@ import { GripVertical, Plus, Sparkles, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { DiapColumn, DiapProduct } from "@/hooks/useDiap";
 import { formatTicket } from "@/hooks/useLadder";
+import { EditableText } from "@/components/ui/editable-text";
+import { useRenameProduct } from "@/hooks/useScale";
 
 interface Props {
   column: DiapColumn;
@@ -45,6 +47,7 @@ function DiapCard({
         productId: product.product_id,
       },
     });
+  const rename = useRenameProduct();
 
   if (isLuxa) {
     return (
@@ -87,10 +90,14 @@ function DiapCard({
           </button>
         </div>
 
-        <button
-          type="button"
+        <div
+          role="button"
+          tabIndex={0}
           onClick={() => onOpen(product.product_id)}
-          className="relative w-full text-left outline-none"
+          onKeyDown={(e) => {
+            if (e.key === "Enter") onOpen(product.product_id);
+          }}
+          className="relative w-full cursor-pointer text-left outline-none"
         >
           <div className="mb-2 flex items-center gap-2">
             <Sparkles className="h-3 w-3 text-gold" />
@@ -99,7 +106,12 @@ function DiapCard({
             </span>
           </div>
           <h4 className="font-display text-sm font-semibold leading-tight text-white">
-            {product.name}
+            <EditableText
+              value={product.name}
+              onSave={(name) => rename.mutateAsync({ id: product.product_id, name })}
+              ariaLabel="Renomear produto"
+              inputClassName="text-sm font-semibold text-emerald-deep"
+            />
           </h4>
           {product.avg_ticket != null && (
             <div className="mt-4 flex items-end justify-between border-t border-white/10 pt-3">
@@ -113,7 +125,7 @@ function DiapCard({
               </div>
             </div>
           )}
-        </button>
+        </div>
       </div>
     );
   }
@@ -156,10 +168,14 @@ function DiapCard({
         </button>
       </div>
 
-      <button
-        type="button"
+      <div
+        role="button"
+        tabIndex={0}
         onClick={() => onOpen(product.product_id)}
-        className="w-full text-left outline-none"
+        onKeyDown={(e) => {
+          if (e.key === "Enter") onOpen(product.product_id);
+        }}
+        className="w-full cursor-pointer text-left outline-none"
       >
         <div className="mb-3 flex items-start justify-between">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-deep/5 text-base">
@@ -167,7 +183,12 @@ function DiapCard({
           </div>
         </div>
         <h4 className="font-display text-sm font-semibold leading-tight text-emerald-deep">
-          {product.name}
+          <EditableText
+            value={product.name}
+            onSave={(name) => rename.mutateAsync({ id: product.product_id, name })}
+            ariaLabel="Renomear produto"
+            inputClassName="text-sm font-semibold text-emerald-deep"
+          />
         </h4>
         {product.avg_ticket != null && (
           <div className="mt-4 flex items-center justify-between border-t border-emerald-deep/5 pt-3">
@@ -179,7 +200,7 @@ function DiapCard({
             </span>
           </div>
         )}
-      </button>
+      </div>
     </div>
   );
 }

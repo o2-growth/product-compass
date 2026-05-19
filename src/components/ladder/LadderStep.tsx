@@ -4,6 +4,8 @@ import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@/lib/utils";
 import type { LadderGroup, LadderTrack, LadderProduct } from "@/hooks/useLadder";
 import { TRACK_SUBTITLE, formatTicket } from "@/hooks/useLadder";
+import { EditableText } from "@/components/ui/editable-text";
+import { useRenameLadderGroup, useRenameProduct } from "@/hooks/useScale";
 
 const CARD_W = 108;
 const CARD_H = 96;
@@ -42,6 +44,7 @@ function DraggableCard({
       id: `placement:${product.placement_id}`,
       data: { type: "ladder-placement", placementId: product.placement_id, productId: product.id },
     });
+  const rename = useRenameProduct();
 
   return (
     <div
@@ -86,19 +89,26 @@ function DraggableCard({
         <X className="h-3 w-3" />
       </button>
 
-      {/* Botão "abrir" cobre todo o card exceto os handles */}
+      {/* Botão "abrir" cobre só área do ícone/chevron — não cobre o nome editável */}
       <button
         type="button"
         onClick={() => onOpen(product.id)}
-        className="absolute inset-0 flex cursor-pointer flex-col p-1.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
+        className="absolute inset-0 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
         aria-label={`Abrir ${product.name}`}
-      >
+      />
+      <div className="pointer-events-none relative flex h-full flex-col p-1.5">
         <div className="ml-3.5 mt-0.5 text-base leading-none">{product.icon || "📦"}</div>
-        <div className="mt-1 line-clamp-3 text-[10px] font-semibold leading-tight text-neutral-900">
-          {product.name}
+        <div className="pointer-events-auto mt-1 text-[10px] font-semibold leading-tight text-neutral-900">
+          <EditableText
+            value={product.name}
+            onSave={(name) => rename.mutateAsync({ id: product.id, name })}
+            ariaLabel="Renomear produto"
+            className="block w-full"
+            inputClassName="text-[10px] font-semibold"
+          />
         </div>
         <ChevronRight className="absolute bottom-1 right-1 h-3 w-3 text-neutral-800 opacity-0 transition-opacity duration-150 group-hover:opacity-90" />
-      </button>
+      </div>
     </div>
   );
 }
@@ -114,6 +124,7 @@ export function LadderStep({
 }: LadderStepProps) {
   const bottom = `${50 + stepIndex * STEP_DELTA_Y}px`;
   const subtitle = TRACK_SUBTITLE[track]?.[group.name];
+  const renameGroup = useRenameLadderGroup();
 
   // Tiles are only real products, wrapped in rows of MAX_PER_ROW
   const tiles = group.products.length;
@@ -135,7 +146,14 @@ export function LadderStep({
     <div className="absolute" style={{ left: `${leftPx}px`, bottom }}>
       <div className="mb-2 flex items-center gap-1.5 px-1">
         <h3 className="text-sm font-bold uppercase tracking-wide text-foreground">
-          {group.name}
+          <EditableText
+            value={group.name}
+            onSave={(newName) =>
+              renameGroup.mutateAsync({ track, oldName: group.name, newName })
+            }
+            ariaLabel="Renomear categoria"
+            inputClassName="text-sm font-bold uppercase tracking-wide"
+          />
         </h3>
         <button
           type="button"

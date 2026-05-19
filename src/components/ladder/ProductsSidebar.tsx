@@ -2,12 +2,13 @@ import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Search, GripVertical } from "lucide-react";
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import { useProducts, useToggleProductActive } from "@/hooks/useScale";
+import { useProducts, useRenameProduct, useToggleProductActive } from "@/hooks/useScale";
 import { STATUS_DOT, STATUS_LABEL, type Product } from "@/types/scale";
 import { formatTicket } from "@/hooks/useLadder";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { EditableText } from "@/components/ui/editable-text";
 import { cn } from "@/lib/utils";
 
 function DraggableSidebarItem({
@@ -20,6 +21,7 @@ function DraggableSidebarItem({
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({ id: `sidebar:${product.id}`, data: { type: "ladder-product", productId: product.id } });
   const toggle = useToggleProductActive();
+  const rename = useRenameProduct();
   const isActive = product.status === "active";
 
   return (
@@ -58,11 +60,16 @@ function DraggableSidebarItem({
             />
             <span
               className={cn(
-                "truncate font-medium",
+                "min-w-0 flex-1 font-medium",
                 !isActive && "line-through text-muted-foreground",
               )}
             >
-              {product.name}
+              <EditableText
+                value={product.name}
+                onSave={(name) => rename.mutateAsync({ id: product.id, name })}
+                ariaLabel="Renomear produto"
+                inputClassName="text-xs font-medium"
+              />
             </span>
           </div>
           <div className="mt-0.5 text-[10px] text-muted-foreground">
