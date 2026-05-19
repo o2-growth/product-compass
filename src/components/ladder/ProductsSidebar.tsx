@@ -58,10 +58,17 @@ function DraggableSidebarItem({
       >
         <GripVertical className="h-3 w-3" />
       </button>
-      <button
-        type="button"
+      <div
+        role="button"
+        tabIndex={0}
         onClick={() => onOpen?.(product.id)}
-        className="flex min-w-0 flex-1 items-start gap-2 text-left outline-none"
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onOpen?.(product.id);
+          }
+        }}
+        className="flex min-w-0 flex-1 cursor-pointer items-start gap-2 text-left outline-none"
       >
         <span className="text-base leading-none">{product.icon}</span>
         <div className="min-w-0 flex-1">
@@ -88,7 +95,7 @@ function DraggableSidebarItem({
             {formatTicket(product.avg_ticket)}
           </div>
         </div>
-      </button>
+      </div>
       <Switch
         checked={isActive}
         onCheckedChange={(checked) =>
