@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useProducts, useTiers } from "@/hooks/useScale";
@@ -180,18 +180,6 @@ export function OrgChart() {
     return buildTreeByTier(products, tiers);
   }, [groupBy, products, tiers]);
 
-  // Inicializa tudo fechado quando a árvore muda
-  useEffect(() => {
-    const all = new Set<string>();
-    for (const root of tree) {
-      all.add(`root:${root.key}`);
-      for (const group of root.groups) {
-        all.add(`group:${group.key}`);
-      }
-    }
-    setCollapsed(all);
-  }, [tree]);
-
   const toggle = (key: string) => {
     setCollapsed((prev) => {
       const next = new Set(prev);
@@ -227,12 +215,12 @@ export function OrgChart() {
           <>
             <Button
               size="sm"
-              className="gap-1.5 rounded-full bg-emerald-deep px-4 text-background hover:bg-emerald-deep/90"
+              className="gap-1.5 rounded-full bg-gold px-4 text-emerald-deep hover:bg-gold/90"
               onClick={openCreate}
             >
               <Plus className="h-4 w-4" /> Adicionar produto
             </Button>
-            <div className="flex items-center gap-1 rounded-full border border-border bg-muted/60 p-1">
+            <div className="flex items-center gap-1 rounded-full bg-black/25 p-1">
               {(
                 [
                   ["track", "Trilha"],
@@ -246,8 +234,8 @@ export function OrgChart() {
                   className={cn(
                     "rounded-full px-3 py-1 text-xs font-bold tracking-wide transition-colors",
                     groupBy === key
-                      ? "bg-emerald-deep text-background shadow-card"
-                      : "text-muted-foreground hover:text-foreground",
+                      ? "bg-gold text-emerald-deep shadow"
+                      : "text-white/60 hover:text-white",
                   )}
                 >
                   {label}

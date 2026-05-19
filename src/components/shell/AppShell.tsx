@@ -9,13 +9,20 @@ const NAV_ITEMS = [
 ] as const;
 
 interface AppShellProps {
+  /** Pequeno eyebrow no header — ex.: "Plataforma" */
   eyebrow?: string;
+  /** Título da view atual no header */
   title?: string;
+  /** Slot pra ações no canto direito do header (botões, toggles) */
   actions?: ReactNode;
+  /** Status bar inferior — left + right */
   footerLeft?: ReactNode;
   footerRight?: ReactNode;
+  /** Conteúdo principal */
   children: ReactNode;
+  /** Sidebar opcional renderizada à esquerda do main */
   sidebar?: ReactNode;
+  /** Remove padding interno do main (quando o conteúdo gerencia o próprio) */
   flushMain?: boolean;
 }
 
@@ -34,25 +41,20 @@ export function AppShell({
   });
 
   return (
-    <div className="min-h-dvh bg-[oklch(0.97_0.003_230)] p-3 lg:p-6">
-      <div className="mx-auto flex h-[calc(100dvh-1.5rem)] max-w-[1700px] flex-col overflow-hidden rounded-3xl border border-border bg-background shadow-shell lg:h-[calc(100dvh-3rem)]">
-        {/* Top navigation — minimalista, alinhado com site institucional O2 */}
-        <header className="flex shrink-0 items-center justify-between gap-6 border-b border-border bg-background px-6 py-4 lg:px-8 lg:py-5">
+    <div className="min-h-dvh bg-cream p-3 lg:p-6">
+      <div className="mx-auto flex h-[calc(100dvh-1.5rem)] max-w-[1700px] flex-col overflow-hidden rounded-[32px] border border-emerald-deep/10 bg-white shadow-shell lg:h-[calc(100dvh-3rem)]">
+        {/* Top Navigation Bar */}
+        <header className="flex shrink-0 items-center justify-between gap-6 bg-emerald-deep px-6 py-4 lg:px-10 lg:py-5">
           <div className="flex items-center gap-6 lg:gap-10">
-            <div className="flex items-center gap-3">
-              <span className="grid h-9 w-9 place-items-center rounded-full bg-emerald-deep text-emerald shadow-card">
-                <span className="h-2.5 w-2.5 rounded-full bg-emerald" />
+            <div className="flex flex-col leading-tight">
+              <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-gold">
+                {eyebrow}
               </span>
-              <div className="flex flex-col leading-tight">
-                <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-muted-foreground">
-                  {eyebrow}
-                </span>
-                <h1 className="font-display text-base font-bold tracking-tight text-foreground lg:text-lg">
-                  {title}
-                </h1>
-              </div>
+              <h1 className="font-display text-base font-semibold text-white lg:text-lg">
+                {title}
+              </h1>
             </div>
-            <nav className="flex rounded-full border border-border bg-muted/60 p-1">
+            <nav className="flex rounded-full bg-black/25 p-1">
               {NAV_ITEMS.map((item) => {
                 const isActive =
                   item.to === "/"
@@ -63,10 +65,10 @@ export function AppShell({
                     key={item.to}
                     to={item.to}
                     className={cn(
-                      "rounded-full px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-all lg:px-5 lg:text-xs",
+                      "rounded-full px-4 py-1.5 text-xs font-semibold transition-all lg:px-5 lg:text-sm",
                       isActive
-                        ? "bg-emerald-deep text-background shadow-card"
-                        : "text-muted-foreground hover:text-foreground",
+                        ? "bg-emerald text-white shadow-lg shadow-black/20"
+                        : "text-white/60 hover:text-white",
                     )}
                   >
                     {item.label}
@@ -83,7 +85,7 @@ export function AppShell({
           {sidebar}
           <main
             className={cn(
-              "flex-1 overflow-auto bg-canvas-soft text-foreground",
+              "flex-1 overflow-auto bg-canvas-soft",
               !flushMain && "p-6 lg:p-8",
             )}
           >
@@ -93,7 +95,7 @@ export function AppShell({
 
         {/* Status footer */}
         {(footerLeft || footerRight) && (
-          <footer className="flex shrink-0 items-center justify-between gap-4 border-t border-border bg-background px-6 py-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground lg:px-8">
+          <footer className="flex shrink-0 items-center justify-between gap-4 border-t border-emerald-deep/10 bg-white px-6 py-3 text-[11px] font-semibold text-emerald-deep/50 lg:px-10">
             <div className="flex flex-wrap gap-6">{footerLeft}</div>
             <div className="flex flex-wrap gap-4">{footerRight}</div>
           </footer>
@@ -110,7 +112,8 @@ export function FooterDot({
   color?: "emerald" | "gold" | "muted";
   children: ReactNode;
 }) {
-  const cls = color === "muted" ? "bg-muted-foreground/40" : "bg-emerald";
+  const cls =
+    color === "gold" ? "bg-gold" : color === "muted" ? "bg-emerald-deep/30" : "bg-emerald";
   return (
     <div className="flex items-center gap-2">
       <span className={cn("h-2 w-2 rounded-full", cls)} />

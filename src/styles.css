@@ -45,67 +45,57 @@
 :root {
   --radius: 0.875rem;
 
-  /* O2 Inc — paleta refinada: branco/cinza minimalista + verde neon como accent
-     (alinhada com o site institucional o2inc.com.br) */
-  --emerald-deep: oklch(0.18 0.01 230);     /* near-black azulado pra textos */
-  --emerald: oklch(0.82 0.24 145);          /* verde neon — accent */
-  --gold: oklch(0.82 0.24 145);             /* alias do verde (compat com Lovable) */
-  --cream: oklch(0.98 0.005 100);           /* off-white sutil */
+  /* Emerald Prestige palette */
+  --emerald-deep: oklch(0.32 0.07 165);   /* #064e3b */
+  --emerald: oklch(0.49 0.10 165);        /* #0d7a5f */
+  --gold: oklch(0.76 0.12 85);            /* #c9a84c */
+  --cream: oklch(0.96 0.025 90);          /* #f5f0e0 */
 
-  /* === LIGHT THEME BASE === */
-  --background: oklch(1 0 0);                       /* white puro */
-  --foreground: oklch(0.18 0.01 230);               /* texto principal */
-  --card: oklch(1 0 0);                              /* card branco */
-  --card-foreground: oklch(0.18 0.01 230);
+  --background: oklch(1 0 0);
+  --foreground: var(--emerald-deep);
+  --card: oklch(1 0 0);
+  --card-foreground: var(--emerald-deep);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.01 230);
+  --popover-foreground: var(--emerald-deep);
 
-  --primary: oklch(0.18 0.01 230);                  /* preto sutil pros botões primary */
+  --primary: var(--emerald-deep);
   --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.965 0.003 230);              /* cinza muito claro */
-  --secondary-foreground: oklch(0.18 0.01 230);
-  --muted: oklch(0.965 0.003 230);
-  --muted-foreground: oklch(0.45 0.01 230);
-  --accent: oklch(0.96 0.05 145);                   /* verde MUITO pálido pra hover */
-  --accent-foreground: oklch(0.18 0.01 230);
+  --secondary: var(--cream);
+  --secondary-foreground: var(--emerald-deep);
+  --muted: oklch(0.97 0.012 90);
+  --muted-foreground: oklch(0.5 0.02 165);
+  --accent: var(--cream);
+  --accent-foreground: var(--emerald-deep);
   --destructive: oklch(0.6 0.22 25);
   --destructive-foreground: oklch(0.99 0 0);
-  --border: oklch(0.91 0.005 230);                  /* cinza claro VISÍVEL */
-  --input: oklch(0.91 0.005 230);
-  --ring: oklch(0.82 0.24 145);                     /* anel verde no foco */
+  --border: oklch(0.32 0.07 165 / 0.10);
+  --input: oklch(0.32 0.07 165 / 0.15);
+  --ring: var(--emerald);
 
-  --canvas: oklch(0.985 0.003 230);                 /* canvas sutilmente off-white */
-  --tier-header: oklch(0.18 0.01 230);
+  --canvas: var(--cream);
+  --tier-header: var(--emerald-deep);
   --tier-header-foreground: oklch(0.99 0 0);
 
-  --status-active: oklch(0.78 0.24 145);            /* verde neon */
-  --status-development: oklch(0.78 0.16 75);        /* amber */
-  --status-planned: oklch(0.55 0.02 250);           /* slate */
+  --status-active: var(--emerald);
+  --status-development: var(--gold);
+  --status-planned: oklch(0.7 0.04 250);
 
-  --shadow-card: 0 1px 2px 0 oklch(0.18 0.01 230 / 0.04),
-                 0 1px 3px 0 oklch(0.18 0.01 230 / 0.06);
-  --shadow-card-hover: 0 8px 24px -6px oklch(0.18 0.01 230 / 0.10),
-                       0 2px 6px -2px oklch(0.18 0.01 230 / 0.06);
-  --shadow-fab: 0 16px 40px -10px oklch(0.82 0.24 145 / 0.35),
-                0 4px 10px -2px oklch(0.18 0.01 230 / 0.08);
-  --shadow-shell: 0 30px 80px -30px oklch(0.18 0.01 230 / 0.15);
+  --shadow-card: 0 1px 2px 0 oklch(0.32 0.07 165 / 0.05), 0 1px 3px 0 oklch(0.32 0.07 165 / 0.04);
+  --shadow-card-hover: 0 8px 24px -8px oklch(0.32 0.07 165 / 0.18), 0 2px 6px -2px oklch(0.32 0.07 165 / 0.08);
+  --shadow-fab: 0 12px 30px -8px oklch(0.32 0.07 165 / 0.35), 0 4px 10px -2px oklch(0 0 0 / 0.10);
+  --shadow-shell: 0 30px 80px -30px oklch(0.32 0.07 165 / 0.25);
 }
 
-/* === SUPERFÍCIES UTILITÁRIAS === */
 .bg-dot-grid {
-  background-image: radial-gradient(
-    circle,
-    oklch(0.18 0.01 230 / 0.06) 1px,
-    transparent 1px
-  );
+  background-image: radial-gradient(circle, oklch(0.32 0.07 165 / 0.10) 1px, transparent 1px);
   background-size: 18px 18px;
 }
 
 .bg-canvas-soft {
-  background-color: oklch(0.985 0.003 230);
+  background-color: var(--cream);
   background-image:
-    radial-gradient(circle at 0 0,   oklch(0.82 0.24 145 / 0.06), transparent 45%),
-    radial-gradient(circle at 100% 100%, oklch(0.82 0.24 145 / 0.04), transparent 45%);
+    radial-gradient(circle at 0 0, oklch(0.49 0.10 165 / 0.05), transparent 45%),
+    radial-gradient(circle at 100% 100%, oklch(0.76 0.12 85 / 0.06), transparent 45%);
 }
 
 .shadow-card { box-shadow: var(--shadow-card); }
@@ -113,49 +103,18 @@
 .shadow-fab { box-shadow: var(--shadow-fab); }
 .shadow-shell { box-shadow: var(--shadow-shell); }
 
-/* === BASE === */
 @layer base {
-  * {
-    border-color: var(--color-border);
-  }
-  html,
-  body {
+  * { border-color: var(--color-border); }
+  html, body {
     font-family: var(--font-sans);
   }
   body {
-    background-color: oklch(0.97 0.003 230);
+    background-color: var(--cream);
     color: var(--color-foreground);
     font-feature-settings: "ss01", "cv11";
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
   }
-  h1,
-  h2,
-  h3,
-  h4,
-  h5 {
+  h1, h2, h3, h4, h5 {
     font-family: var(--font-display);
-    font-weight: 700;
-    letter-spacing: -0.015em;
-    color: var(--color-foreground);
-  }
-  /* Scrollbar minimalista */
-  ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-  }
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: oklch(0.85 0.005 230);
-    border-radius: 999px;
-    border: 2px solid transparent;
-    background-clip: content-box;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: oklch(0.7 0.005 230);
-    background-clip: content-box;
-    border: 2px solid transparent;
+    letter-spacing: -0.01em;
   }
 }
