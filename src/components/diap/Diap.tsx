@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link } from "@tanstack/react-router";
-import { LayoutGrid, Network, Palette, Plus, ArrowUpRight } from "lucide-react";
+import { Plus } from "lucide-react";
 import {
   DndContext,
   type DragEndEvent,
@@ -21,6 +20,7 @@ import {
 import { DiapColumnView } from "./DiapColumn";
 import { ProductsSidebar } from "@/components/ladder/ProductsSidebar";
 import { ProductDrawer } from "@/components/scale/ProductDrawer";
+import { AppShell, FooterDot } from "@/components/shell/AppShell";
 
 type DrawerMode = "create" | "edit" | null;
 
@@ -42,6 +42,11 @@ export function Diap() {
   const activeProduct = useMemo(
     () => (activeId ? products.find((p) => p.id === activeId) : undefined),
     [activeId, products],
+  );
+
+  const totalPlacements = useMemo(
+    () => columns.reduce((acc, c) => acc + c.products.length, 0),
+    [columns],
   );
 
   const openEdit = (id: string) => {
@@ -67,14 +72,12 @@ export function Diap() {
 
     const rawId = String(active.id);
 
-    // Move placement existente entre colunas
     if (rawId.startsWith("diap-placement:")) {
       const placementId = rawId.slice("diap-placement:".length);
       move.mutate({ placementId, column: overData.column });
       return;
     }
 
-    // Drag da sidebar de produtos → add placement
     const productId = rawId.startsWith("sidebar:")
       ? rawId.slice("sidebar:".length)
       : rawId;
@@ -84,87 +87,56 @@ export function Diap() {
   };
 
   return (
-    <div className="flex h-screen flex-col bg-background">
-      {/* Header */}
-      <header className="flex items-center gap-3 border-b bg-background px-6 py-3">
-        <div className="flex items-center gap-2">
-          <Link to="/">
-            <Button variant="ghost" size="sm" className="gap-1.5">
-              <LayoutGrid className="h-4 w-4" /> Home
-            </Button>
-          </Link>
-          <div className="ml-2 flex h-8 w-8 items-center justify-center rounded-lg bg-status-active font-bold text-tier-header">
-            O₂
-          </div>
-          <div>
-            <div className="text-sm font-semibold">DIAP</div>
-            <div className="text-[11px] text-muted-foreground">
-              Arraste produtos da sidebar pra cada letra · clique pra abrir
-            </div>
-          </div>
-        </div>
-
-        <div className="ml-auto flex items-center gap-2">
+    <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+      <AppShell
+        eyebrow="Metodologia"
+        title="DIAP — Jornada do cliente"
+        flushMain
+        sidebar={<ProductsSidebar onOpenProduct={openEdit} />}
+        actions={
           <Button
-            variant="default"
             size="sm"
-            className="gap-1.5"
+            className="gap-1.5 rounded-full bg-gold px-4 text-emerald-deep hover:bg-gold/90"
             onClick={openCreate}
           >
             <Plus className="h-4 w-4" /> Adicionar produto
           </Button>
-          <Link to="/ladder">
-            <Button variant="outline" size="sm" className="gap-1.5">
-              <ArrowUpRight className="h-4 w-4" /> Value Ladder
-            </Button>
-          </Link>
-          <Link to="/whiteboard">
-            <Button variant="outline" size="sm" className="gap-1.5">
-              <Palette className="h-4 w-4" /> Whiteboard
-            </Button>
-          </Link>
-          <Link to="/orgchart">
-            <Button variant="outline" size="sm" className="gap-1.5">
-              <Network className="h-4 w-4" /> Organograma
-            </Button>
-          </Link>
-        </div>
-      </header>
-
-      <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-        <div className="flex flex-1 overflow-hidden">
-          <ProductsSidebar onOpenProduct={openEdit} />
-
-          <main className="relative flex-1 overflow-auto bg-canvas-soft">
-            <div className="mx-auto min-h-full p-8" style={{ minWidth: 1200 }}>
-              <h1 className="mb-6 text-center text-2xl font-bold text-foreground">
-                Metodologia DIAP — Processo de entrada do cliente
-              </h1>
-
-              {isLoading ? (
-                <div className="flex h-64 items-center justify-center text-muted-foreground">
-                  Carregando...
-                </div>
-              ) : (
-                <div className="flex justify-center gap-6">
-                  {DIAP_COLUMNS.map((col) => {
-                    const data = columns.find((c) => c.column === col);
-                    return (
-                      <DiapColumnView
-                        key={col}
-                        column={col}
-                        products={data?.products ?? []}
-                        onOpenProduct={openEdit}
-                        onRemovePlacement={(pid) => remove.mutate(pid)}
-                      />
-                    );
-                  })}
-                </div>
-              )}
+        }
+        footerLeft={
+          <>
+            <FooterDot color="emerald">{products.length} produtos</FooterDot>
+            <FooterDot color="gold">{totalPlacements} placements DIAP</FooterDot>
+          </>
+        }
+        footerRight={
+          <>
+            <span>Arraste produtos da barra lateral pra cada coluna</span>
+          </>
+        }
+      >
+        <div className="h-full p-6 lg:p-8">
+          {isLoading ? (
+            <div className="flex h-64 items-center justify-center text-muted-foreground">
+              Carregando...
             </div>
-          </main>
+          ) : (
+            <div className="flex h-full min-w-[1500px] gap-5 lg:gap-6">
+              {DIAP_COLUMNS.map((col) => {
+                const data = columns.find((c) => c.column === col);
+                return (
+                  <DiapColumnView
+                    key={col}
+                    column={col}
+                    products={data?.products ?? []}
+                    onOpenProduct={openEdit}
+                    onRemovePlacement={(pid) => remove.mutate(pid)}
+                  />
+                );
+              })}
+            </div>
+          )}
         </div>
-      </DndContext>
+      </AppShell>
 
       <ProductDrawer
         mode={drawerMode}
@@ -172,6 +144,6 @@ export function Diap() {
         tiers={tiers}
         onClose={closeDrawer}
       />
-    </div>
+    </DndContext>
   );
 }
