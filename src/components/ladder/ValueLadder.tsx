@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { LayoutGrid, Network, Plus, Palette } from "lucide-react";
+import { LayoutGrid, Network, Plus, Palette, GitBranch } from "lucide-react";
 import {
   DndContext,
   type DragEndEvent,
@@ -145,6 +145,11 @@ export function ValueLadder() {
             <Plus className="h-4 w-4" /> Adicionar produto
           </Button>
 
+          <Link to="/diap">
+            <Button variant="outline" size="sm" className="gap-1.5">
+              <GitBranch className="h-4 w-4" /> DIAP
+            </Button>
+          </Link>
           <Link to="/whiteboard">
             <Button variant="outline" size="sm" className="gap-1.5">
               <Palette className="h-4 w-4" /> Whiteboard

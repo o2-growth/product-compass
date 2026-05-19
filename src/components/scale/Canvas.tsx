@@ -6,7 +6,7 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { Search, Plus, LayoutGrid, Network, ChevronRight, Palette } from "lucide-react";
+import { Search, Plus, LayoutGrid, Network, ChevronRight, Palette, GitBranch } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -142,6 +142,11 @@ export function Canvas() {
           </Select>
         </div>
 
+        <Link to="/diap">
+          <Button variant="outline" className="gap-1.5">
+            <GitBranch className="h-4 w-4" /> DIAP
+          </Button>
+        </Link>
         <Link to="/whiteboard">
           <Button variant="outline" className="gap-1.5">
             <Palette className="h-4 w-4" /> Whiteboard

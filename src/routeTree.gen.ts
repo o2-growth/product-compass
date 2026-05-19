@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WhiteboardRouteImport } from './routes/whiteboard'
 import { Route as OrgchartRouteImport } from './routes/orgchart'
 import { Route as LadderRouteImport } from './routes/ladder'
+import { Route as DiapRouteImport } from './routes/diap'
 import { Route as IndexRouteImport } from './routes/index'
 
 const WhiteboardRoute = WhiteboardRouteImport.update({
@@ -29,6 +30,11 @@ const LadderRoute = LadderRouteImport.update({
   path: '/ladder',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DiapRoute = DiapRouteImport.update({
+  id: '/diap',
+  path: '/diap',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -37,12 +43,14 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/diap': typeof DiapRoute
   '/ladder': typeof LadderRoute
   '/orgchart': typeof OrgchartRoute
   '/whiteboard': typeof WhiteboardRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/diap': typeof DiapRoute
   '/ladder': typeof LadderRoute
   '/orgchart': typeof OrgchartRoute
   '/whiteboard': typeof WhiteboardRoute
@@ -50,20 +58,22 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/diap': typeof DiapRoute
   '/ladder': typeof LadderRoute
   '/orgchart': typeof OrgchartRoute
   '/whiteboard': typeof WhiteboardRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/ladder' | '/orgchart' | '/whiteboard'
+  fullPaths: '/' | '/diap' | '/ladder' | '/orgchart' | '/whiteboard'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/ladder' | '/orgchart' | '/whiteboard'
-  id: '__root__' | '/' | '/ladder' | '/orgchart' | '/whiteboard'
+  to: '/' | '/diap' | '/ladder' | '/orgchart' | '/whiteboard'
+  id: '__root__' | '/' | '/diap' | '/ladder' | '/orgchart' | '/whiteboard'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DiapRoute: typeof DiapRoute
   LadderRoute: typeof LadderRoute
   OrgchartRoute: typeof OrgchartRoute
   WhiteboardRoute: typeof WhiteboardRoute
@@ -92,6 +102,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LadderRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/diap': {
+      id: '/diap'
+      path: '/diap'
+      fullPath: '/diap'
+      preLoaderRoute: typeof DiapRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -104,6 +121,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DiapRoute: DiapRoute,
   LadderRoute: LadderRoute,
   OrgchartRoute: OrgchartRoute,
   WhiteboardRoute: WhiteboardRoute,
