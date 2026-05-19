@@ -52,6 +52,7 @@ export function ProductDrawer({
           ladder_track: product.ladder_track,
           ladder_group: product.ladder_group ?? "",
           ladder_order: product.ladder_order,
+          created_by: product.created_by ?? "",
         }
       : mode === "create"
         ? {

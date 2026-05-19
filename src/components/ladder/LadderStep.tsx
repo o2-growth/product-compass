@@ -1,4 +1,4 @@
-import { ChevronRight, Plus, GripVertical } from "lucide-react";
+import { ChevronRight, Plus, GripVertical, X } from "lucide-react";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@/lib/utils";
@@ -23,17 +23,25 @@ export interface LadderStepProps {
   track: LadderTrack;
   onOpenProduct: (id: string) => void;
   onAddProduct: (group: string) => void;
+  onRemovePlacement: (placementId: string) => void;
 }
 
 function DraggableCard({
   product,
   onOpen,
+  onRemove,
 }: {
   product: LadderProduct;
   onOpen: (id: string) => void;
+  onRemove: (placementId: string) => void;
 }) {
+  // ID do drag = placement_id com prefixo. Mesmo product_id pode ter vários placements,
+  // então usamos o placement como chave única.
   const { attributes, listeners, setNodeRef, transform, isDragging } =
-    useDraggable({ id: product.id, data: { type: "ladder-product" } });
+    useDraggable({
+      id: `placement:${product.placement_id}`,
+      data: { type: "ladder-placement", placementId: product.placement_id, productId: product.id },
+    });
 
   return (
     <div
@@ -57,21 +65,35 @@ function DraggableCard({
         type="button"
         {...listeners}
         {...attributes}
-        className="absolute left-0.5 top-0.5 z-10 flex h-4 w-4 cursor-grab items-center justify-center rounded text-neutral-700 opacity-0 transition-opacity duration-150 hover:bg-black/10 hover:text-neutral-900 active:cursor-grabbing group-hover:opacity-100"
+        className="absolute left-0.5 top-0.5 z-20 flex h-4 w-4 cursor-grab items-center justify-center rounded text-neutral-700 opacity-0 transition-opacity duration-150 hover:bg-black/10 hover:text-neutral-900 active:cursor-grabbing group-hover:opacity-100"
         title="Arrastar"
         aria-label="Arrastar produto"
       >
         <GripVertical className="h-3 w-3" />
       </button>
 
-      {/* Botão "abrir" cobre todo o card exceto o handle */}
+      {/* Botão remover deste degrau (canto superior direito) */}
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onRemove(product.placement_id);
+        }}
+        className="absolute right-0.5 top-0.5 z-20 flex h-4 w-4 items-center justify-center rounded text-neutral-700 opacity-0 transition-opacity duration-150 hover:bg-red-500/20 hover:text-red-700 group-hover:opacity-100"
+        title="Remover deste degrau"
+        aria-label="Remover deste degrau"
+      >
+        <X className="h-3 w-3" />
+      </button>
+
+      {/* Botão "abrir" cobre todo o card exceto os handles */}
       <button
         type="button"
         onClick={() => onOpen(product.id)}
         className="absolute inset-0 flex cursor-pointer flex-col p-1.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
         aria-label={`Abrir ${product.name}`}
       >
-        <div className="ml-3.5 text-base leading-none">{product.icon || "📦"}</div>
+        <div className="ml-3.5 mt-0.5 text-base leading-none">{product.icon || "📦"}</div>
         <div className="mt-1 line-clamp-3 text-[10px] font-semibold leading-tight text-neutral-900">
           {product.name}
         </div>
@@ -88,6 +110,7 @@ export function LadderStep({
   track,
   onOpenProduct,
   onAddProduct,
+  onRemovePlacement,
 }: LadderStepProps) {
   const bottom = `${50 + stepIndex * STEP_DELTA_Y}px`;
   const subtitle = TRACK_SUBTITLE[track]?.[group.name];
@@ -164,7 +187,12 @@ export function LadderStep({
               {row.map((idx) => {
                 const p = group.products[idx];
                 return p ? (
-                  <DraggableCard key={p.id} product={p} onOpen={onOpenProduct} />
+                  <DraggableCard
+                    key={p.placement_id}
+                    product={p}
+                    onOpen={onOpenProduct}
+                    onRemove={onRemovePlacement}
+                  />
                 ) : null;
               })}
             </div>

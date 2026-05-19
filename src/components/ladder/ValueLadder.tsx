@@ -13,7 +13,9 @@ import { useLadder, TRACK_TITLE, type LadderTrack } from "@/hooks/useLadder";
 import {
   useProducts,
   useTiers,
-  useMoveProductToLadderGroup,
+  useAddProductPlacement,
+  useMoveProductPlacement,
+  useRemoveProductPlacement,
 } from "@/hooks/useScale";
 import { ProductDrawer } from "@/components/scale/ProductDrawer";
 import { LadderStep, getStepLefts, getStepWidth, STEP_DELTA_Y } from "./LadderStep";
@@ -26,7 +28,9 @@ export function ValueLadder() {
   const { data: groups = [], isLoading } = useLadder(track);
   const { data: products = [] } = useProducts();
   const { data: tiers = [] } = useTiers();
-  const moveGroup = useMoveProductToLadderGroup();
+  const addPlacement = useAddProductPlacement();
+  const movePlacement = useMoveProductPlacement();
+  const removePlacement = useRemoveProductPlacement();
 
   const [drawerMode, setDrawerMode] = useState<DrawerMode>(null);
   const [activeId, setActiveId] = useState<string | undefined>();
@@ -66,13 +70,44 @@ export function ValueLadder() {
       | { type: string; group: string; track: LadderTrack }
       | undefined;
     if (!overData || overData.type !== "ladder-group") return;
+
     const rawId = String(active.id);
-    const productId = rawId.startsWith("sidebar:") ? rawId.slice("sidebar:".length) : rawId;
+
+    // Drag de placement existente → MOVE pra outro grupo (mantém só 1 instância nesse drag)
+    if (rawId.startsWith("placement:")) {
+      const placementId = rawId.slice("placement:".length);
+      const activeData = active.data.current as
+        | { productId?: string }
+        | undefined;
+      const product = products.find((p) => p.id === activeData?.productId);
+      // Se já existe placement no destino, evita ação redundante
+      const already = product?.ladder_placements?.some(
+        (lp) =>
+          lp.ladder_track === overData.track &&
+          lp.ladder_group === overData.group,
+      );
+      if (already) return;
+      movePlacement.mutate({
+        placementId,
+        track: overData.track,
+        group: overData.group,
+      });
+      return;
+    }
+
+    // Drag da sidebar → ADD placement (não remove de outros grupos)
+    const productId = rawId.startsWith("sidebar:")
+      ? rawId.slice("sidebar:".length)
+      : rawId;
     const product = products.find((p) => p.id === productId);
     if (!product) return;
-    if (product.ladder_track === overData.track && product.ladder_group === overData.group)
-      return;
-    moveGroup.mutate({
+    const exists = product.ladder_placements?.some(
+      (lp) =>
+        lp.ladder_track === overData.track &&
+        lp.ladder_group === overData.group,
+    );
+    if (exists) return; // upsert seria no-op, mas evita network
+    addPlacement.mutate({
       productId,
       track: overData.track,
       group: overData.group,
@@ -140,11 +175,11 @@ export function ValueLadder() {
         </div>
       </header>
 
-      {/* Body: sidebar + canvas */}
-      <div className="flex flex-1 overflow-hidden">
-        <ProductsSidebar onOpenProduct={openEdit} activeTrack={track} />
+      {/* Body: sidebar + canvas (DndContext envolve ambos pra permitir drag sidebar -> ladder) */}
+      <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+        <div className="flex flex-1 overflow-hidden">
+          <ProductsSidebar onOpenProduct={openEdit} activeTrack={track} />
 
-        <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
           <main className="relative flex-1 overflow-auto">
           {(() => {
             const lefts = groups.length ? getStepLefts(groups) : [];
@@ -225,6 +260,9 @@ export function ValueLadder() {
                           track={track}
                           onOpenProduct={openEdit}
                           onAddProduct={openCreate}
+                          onRemovePlacement={(pid) =>
+                            removePlacement.mutate(pid)
+                          }
                         />
                       ))}
                     </div>
@@ -233,9 +271,9 @@ export function ValueLadder() {
               </div>
             );
           })()}
-        </main>
+          </main>
+        </div>
       </DndContext>
-      </div>
 
       <ProductDrawer
         mode={drawerMode}

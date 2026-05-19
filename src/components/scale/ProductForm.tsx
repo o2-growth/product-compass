@@ -27,6 +27,7 @@ const EMPTY: ProductFormData = {
   ladder_track: null,
   ladder_group: "",
   ladder_order: null,
+  created_by: "",
 };
 
 interface Props {
@@ -256,6 +257,17 @@ export function ProductForm({
               disabled={!form.ladder_track}
             />
           </div>
+        </div>
+
+        <div>
+          <Label htmlFor="created_by">Criado por</Label>
+          <Input
+            id="created_by"
+            maxLength={120}
+            placeholder="Nome de quem criou o produto"
+            value={form.created_by}
+            onChange={(e) => update("created_by", e.target.value)}
+          />
         </div>
 
         <div>

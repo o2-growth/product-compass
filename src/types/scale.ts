@@ -11,6 +11,14 @@ export interface Tier {
   color: string | null;
 }
 
+export interface LadderPlacement {
+  id: string;
+  product_id: string;
+  ladder_track: LadderTrack;
+  ladder_group: string;
+  ladder_order: number;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -27,6 +35,8 @@ export interface Product {
   ladder_track: LadderTrack | null;
   ladder_group: string | null;
   ladder_order: number | null;
+  created_by: string | null;
+  ladder_placements: LadderPlacement[];
 }
 
 export interface ProductFormData {
@@ -41,6 +51,7 @@ export interface ProductFormData {
   ladder_track: LadderTrack | null;
   ladder_group: string;
   ladder_order: number | null;
+  created_by: string;
 }
 
 export const STATUS_LABEL: Record<ProductStatus, string> = {

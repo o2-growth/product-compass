@@ -26,7 +26,9 @@ export function useProducts() {
     queryFn: async (): Promise<Product[]> => {
       const { data, error } = await supabase
         .from("products")
-        .select("*, product_tiers ( tier_id )")
+        .select(
+          "*, product_tiers ( tier_id ), product_ladder_placements ( id, product_id, ladder_track, ladder_group, ladder_order )",
+        )
         .order("position_index", { ascending: true });
       if (error) throw error;
       return (data ?? []).map((p: any) => ({
@@ -35,9 +37,17 @@ export function useProducts() {
         ladder_track: p.ladder_track ?? null,
         ladder_group: p.ladder_group ?? null,
         ladder_order: p.ladder_order ?? null,
+        created_by: p.created_by ?? null,
         tier_ids: (p.product_tiers ?? [])
           .map((pt: any) => pt.tier_id)
           .filter(Boolean),
+        ladder_placements: (p.product_ladder_placements ?? []).map((lp: any) => ({
+          id: lp.id,
+          product_id: lp.product_id,
+          ladder_track: lp.ladder_track,
+          ladder_group: lp.ladder_group,
+          ladder_order: lp.ladder_order ?? 0,
+        })),
       })) as Product[];
     },
   });
@@ -72,6 +82,7 @@ export function useCreateProduct() {
           ladder_track: form.ladder_track,
           ladder_group: form.ladder_group || null,
           ladder_order: form.ladder_order ?? 0,
+          created_by: form.created_by || null,
         })
         .select()
         .single();
@@ -111,6 +122,7 @@ export function useUpdateProduct() {
           ladder_track: form.ladder_track,
           ladder_group: form.ladder_group || null,
           ladder_order: form.ladder_order ?? 0,
+          created_by: form.created_by || null,
         })
         .eq("id", id);
       if (error) throw error;
@@ -141,39 +153,124 @@ export function useDeleteProduct() {
   });
 }
 
-export function useMoveProductToLadderGroup() {
+/**
+ * Cria um placement do produto num degrau da escada.
+ * Idempotente: se já existir placement (product_id, track, group), não duplica.
+ * Mesmo produto pode ter múltiplos placements (em grupos/trilhas diferentes).
+ */
+export function useAddProductPlacement() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({
       productId,
       track,
       group,
+      order,
     }: {
       productId: string;
       track: "b2b" | "b2c";
       group: string;
+      order?: number;
     }) => {
       const { error } = await supabase
-        .from("products")
-        .update({ ladder_track: track, ladder_group: group })
-        .eq("id", productId);
+        .from("product_ladder_placements")
+        .upsert(
+          {
+            product_id: productId,
+            ladder_track: track,
+            ladder_group: group,
+            ladder_order: order ?? 0,
+          },
+          { onConflict: "product_id,ladder_track,ladder_group" },
+        );
       if (error) throw error;
     },
-    onMutate: async ({ productId, track, group }) => {
-      await qc.cancelQueries({ queryKey: ["ladder", track] });
-      const prev = qc.getQueryData(["ladder", track]);
-      qc.setQueriesData<any>({ queryKey: ["ladder"] }, (old: any) => {
-        if (!Array.isArray(old)) return old;
-        return old;
-      });
-      return { prev };
-    },
-    onError: (e: any) => toast.error(e?.message ?? "Erro ao mover na ladder"),
-    onSettled: (_d, _e, vars) => {
+    onSuccess: (_d, vars) => {
       qc.invalidateQueries({ queryKey: ["ladder", vars.track] });
       qc.invalidateQueries({ queryKey: PRODUCTS_KEY });
     },
+    onError: (e: any) =>
+      toast.error(e?.message ?? "Erro ao adicionar na ladder"),
   });
+}
+
+/**
+ * Remove um placement específico (não deleta o produto).
+ */
+export function useRemoveProductPlacement() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (placementId: string) => {
+      const { error } = await supabase
+        .from("product_ladder_placements")
+        .delete()
+        .eq("id", placementId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["ladder"] });
+      qc.invalidateQueries({ queryKey: PRODUCTS_KEY });
+      toast.success("Produto removido do degrau");
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Erro ao remover"),
+  });
+}
+
+/**
+ * Move placement existente pra outro grupo/trilha.
+ * Se o destino já existir (uniqueness), faz delete do origem.
+ */
+export function useMoveProductPlacement() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      placementId,
+      track,
+      group,
+    }: {
+      placementId: string;
+      track: "b2b" | "b2c";
+      group: string;
+    }) => {
+      const { error } = await supabase
+        .from("product_ladder_placements")
+        .update({ ladder_track: track, ladder_group: group })
+        .eq("id", placementId);
+      if (error) {
+        // Conflict (já existe placement no destino) — apenas remove o de origem
+        const isConflict =
+          (error as any).code === "23505" ||
+          /duplicate key|unique/i.test(error.message ?? "");
+        if (isConflict) {
+          const { error: delErr } = await supabase
+            .from("product_ladder_placements")
+            .delete()
+            .eq("id", placementId);
+          if (delErr) throw delErr;
+          return;
+        }
+        throw error;
+      }
+    },
+    onSuccess: (_d, vars) => {
+      qc.invalidateQueries({ queryKey: ["ladder", vars.track] });
+      qc.invalidateQueries({ queryKey: ["ladder"] });
+      qc.invalidateQueries({ queryKey: PRODUCTS_KEY });
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Erro ao mover"),
+  });
+}
+
+/** @deprecated mantido pra compat com chamadas antigas; usa hooks de placement novos. */
+export function useMoveProductToLadderGroup() {
+  const add = useAddProductPlacement();
+  return {
+    mutate: (v: { productId: string; track: "b2b" | "b2c"; group: string }) =>
+      add.mutate(v),
+    mutateAsync: (v: { productId: string; track: "b2b" | "b2c"; group: string }) =>
+      add.mutateAsync(v),
+    isPending: add.isPending,
+  };
 }
 
 export function useMoveProductToTier() {
