@@ -33,6 +33,7 @@ function DraggableSidebarItem({
     useDraggable({ id: `sidebar:${product.id}`, data: { type: "ladder-product", productId: product.id } });
   const toggle = useToggleProductActive();
   const rename = useRenameProduct();
+  const del = useDeleteProduct();
   const isActive = product.status === "active";
 
   return (
