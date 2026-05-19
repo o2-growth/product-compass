@@ -234,6 +234,7 @@ export function ValueLadder() {
           })()}
         </main>
       </DndContext>
+      </div>
 
       <ProductDrawer
         mode={drawerMode}
