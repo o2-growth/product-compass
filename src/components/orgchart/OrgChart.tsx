@@ -1,11 +1,12 @@
 import { useMemo, useState } from "react";
-import { Link } from "@tanstack/react-router";
-import { Home, Layers, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useProducts, useTiers } from "@/hooks/useScale";
 import { ProductDrawer } from "@/components/scale/ProductDrawer";
 import type { Product } from "@/types/scale";
 import { OrgNode } from "./OrgNode";
+import { AppShell, FooterDot } from "@/components/shell/AppShell";
+import { cn } from "@/lib/utils";
 
 type GroupBy = "track" | "status" | "tier";
 type DrawerMode = "create" | "edit" | null;
@@ -203,78 +204,50 @@ export function OrgChart() {
     setActiveId(undefined);
   };
 
+  const totalProducts = products.length;
+
   return (
-    <div className="flex h-screen flex-col bg-background">
-      {/* Header */}
-      <header className="flex items-center gap-3 border-b bg-background px-6 py-3">
-        <div className="flex items-center gap-2">
-          <Link to="/">
-            <Button variant="ghost" size="sm" className="gap-1.5">
-              <Home className="h-4 w-4" /> Home
+    <>
+      <AppShell
+        eyebrow="Estrutura"
+        title="Organograma do Portfólio"
+        actions={
+          <>
+            <Button
+              size="sm"
+              className="gap-1.5 rounded-full bg-gold px-4 text-emerald-deep hover:bg-gold/90"
+              onClick={openCreate}
+            >
+              <Plus className="h-4 w-4" /> Adicionar produto
             </Button>
-          </Link>
-          <div className="ml-2 flex h-8 w-8 items-center justify-center rounded-lg bg-status-active font-bold text-tier-header">
-            O₂
-          </div>
-          <div>
-            <div className="text-sm font-semibold">
-              Organograma do Portfólio
+            <div className="flex items-center gap-1 rounded-full bg-black/25 p-1">
+              {(
+                [
+                  ["track", "Trilha"],
+                  ["status", "Status"],
+                  ["tier", "Tier"],
+                ] as const
+              ).map(([key, label]) => (
+                <button
+                  key={key}
+                  onClick={() => setGroupBy(key)}
+                  className={cn(
+                    "rounded-full px-3 py-1 text-xs font-bold tracking-wide transition-colors",
+                    groupBy === key
+                      ? "bg-gold text-emerald-deep shadow"
+                      : "text-white/60 hover:text-white",
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
-            <div className="text-[11px] text-muted-foreground">O2 Inc.</div>
-          </div>
-        </div>
-
-        <div className="ml-auto flex items-center gap-2">
-          <Button
-            variant="default"
-            size="sm"
-            className="gap-1.5"
-            onClick={openCreate}
-          >
-            <Plus className="h-4 w-4" /> Adicionar produto
-          </Button>
-
-          <Link to="/ladder">
-            <Button variant="outline" size="sm" className="gap-1.5">
-              <Layers className="h-4 w-4" /> Ladder
-            </Button>
-          </Link>
-
-          <div className="flex items-center gap-1 rounded-lg border bg-muted/40 p-1">
-            {(
-              [
-                ["track", "Trilha"],
-                ["status", "Status"],
-                ["tier", "Tier"],
-              ] as const
-            ).map(([key, label]) => (
-              <button
-                key={key}
-                onClick={() => setGroupBy(key)}
-                className={[
-                  "rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
-                  groupBy === key
-                    ? "bg-status-active text-tier-header shadow"
-                    : "text-muted-foreground hover:text-foreground",
-                ].join(" ")}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </header>
-
-      {/* Canvas */}
-      <main
-        className="flex-1 overflow-auto"
-        style={{
-          backgroundImage:
-            "linear-gradient(to right, rgba(0,0,0,0.045) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.045) 1px, transparent 1px)",
-          backgroundSize: "40px 40px",
-        }}
+          </>
+        }
+        footerLeft={<FooterDot color="emerald">{totalProducts} produtos no portfólio</FooterDot>}
+        footerRight={<span>Clique em qualquer nó pra abrir o produto</span>}
       >
-        <div className="mx-auto min-w-fit px-8 py-10">
+        <div className="mx-auto min-w-fit">
           {isLoading ? (
             <div className="flex h-[60vh] items-center justify-center text-muted-foreground">
               Carregando...
@@ -287,7 +260,7 @@ export function OrgChart() {
             <div className="org-tree flex justify-center gap-12">
               {tree.map((root) => {
                 const rootCollapsed = collapsed.has(`root:${root.key}`);
-                const totalProducts = root.groups.reduce(
+                const rootTotal = root.groups.reduce(
                   (acc, g) => acc + g.products.length,
                   0,
                 );
@@ -299,7 +272,7 @@ export function OrgChart() {
                           variant="root"
                           label={root.label}
                           subtitle={root.subtitle}
-                          childCount={totalProducts}
+                          childCount={rootTotal}
                           collapsed={rootCollapsed}
                           onToggle={() => toggle(`root:${root.key}`)}
                         />
@@ -354,7 +327,7 @@ export function OrgChart() {
             </div>
           )}
         </div>
-      </main>
+      </AppShell>
 
       <ProductDrawer
         mode={drawerMode}
@@ -362,6 +335,7 @@ export function OrgChart() {
         tiers={tiers}
         onClose={closeDrawer}
       />
+
 
       {/* CSS-only tree connectors */}
       <style>{`
@@ -486,6 +460,6 @@ export function OrgChart() {
           z-index: 1;
         }
       `}</style>
-    </div>
+    </>
   );
 }
