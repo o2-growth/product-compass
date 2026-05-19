@@ -92,12 +92,12 @@ export function LadderStep({
   const bottom = `${50 + stepIndex * STEP_DELTA_Y}px`;
   const subtitle = TRACK_SUBTITLE[track]?.[group.name];
 
-  // Tiles include products + 1 "add" tile, wrapped in rows of MAX_PER_ROW
-  const tiles = group.products.length + 1;
-  const cols = Math.min(MAX_PER_ROW, tiles);
+  // Tiles are only real products, wrapped in rows of MAX_PER_ROW
+  const tiles = group.products.length;
+  const cols = Math.min(MAX_PER_ROW, Math.max(tiles, 1));
   const innerWidth = cols * CARD_W + (cols - 1) * CARD_GAP + PAD * 2;
 
-  // Build rows of indices [0..tiles-1] (last index = add button)
+  // Build rows of product indices only
   const rows: number[][] = [];
   for (let i = 0; i < tiles; i += MAX_PER_ROW) {
     rows.push(Array.from({ length: Math.min(MAX_PER_ROW, tiles - i) }, (_, k) => i + k));
