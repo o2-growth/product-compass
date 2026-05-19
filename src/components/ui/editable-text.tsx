@@ -36,6 +36,7 @@ export function EditableText({
   showIcon = true,
   ariaLabel = "Editar",
   as = "span",
+  clamp = false,
 }: Props) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value);
