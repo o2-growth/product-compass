@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLadder, TRACK_TITLE, type LadderTrack } from "@/hooks/useLadder";
-import { LadderStep } from "./LadderStep";
+import { LadderStep, getStepLefts, getStepWidth } from "./LadderStep";
 
 export function ValueLadder() {
   const [track, setTrack] = useState<LadderTrack>("b2b");
