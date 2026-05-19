@@ -1,10 +1,69 @@
 import { useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search, GripVertical } from "lucide-react";
+import { useDraggable } from "@dnd-kit/core";
+import { CSS } from "@dnd-kit/utilities";
 import { useProducts } from "@/hooks/useScale";
 import { STATUS_DOT, STATUS_LABEL, type Product } from "@/types/scale";
 import { formatTicket } from "@/hooks/useLadder";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+function DraggableSidebarItem({
+  product,
+  onOpen,
+}: {
+  product: Product;
+  onOpen?: (id: string) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } =
+    useDraggable({ id: product.id, data: { type: "ladder-product" } });
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{
+        transform: CSS.Translate.toString(transform),
+        opacity: isDragging ? 0.4 : 1,
+        zIndex: isDragging ? 1000 : "auto",
+      }}
+      className={cn(
+        "group/item relative flex w-full items-start gap-1 rounded-md px-1 py-1.5 text-left text-xs transition-colors hover:bg-accent",
+      )}
+    >
+      <button
+        type="button"
+        {...listeners}
+        {...attributes}
+        className="flex h-5 w-4 shrink-0 cursor-grab items-center justify-center rounded text-muted-foreground opacity-0 transition-opacity hover:text-foreground active:cursor-grabbing group-hover/item:opacity-100"
+        title="Arrastar para a escada"
+        aria-label="Arrastar produto"
+      >
+        <GripVertical className="h-3 w-3" />
+      </button>
+      <button
+        type="button"
+        onClick={() => onOpen?.(product.id)}
+        className="flex min-w-0 flex-1 items-start gap-2 text-left outline-none"
+      >
+        <span className="text-base leading-none">{product.icon}</span>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5">
+            <span
+              className={`h-1.5 w-1.5 shrink-0 rounded-full ${STATUS_DOT[product.status]}`}
+              title={STATUS_LABEL[product.status]}
+            />
+            <span className="truncate font-medium">{product.name}</span>
+          </div>
+          <div className="mt-0.5 text-[10px] text-muted-foreground">
+            {formatTicket(product.avg_ticket)}
+          </div>
+        </div>
+      </button>
+    </div>
+  );
+}
+
 
 interface Props {
   onOpenProduct?: (id: string) => void;
