@@ -26,7 +26,7 @@ export interface LadderGroup {
 const B2B_GROUP_ORDER = [
   "Free Content",
   "Marketing Engineering",
-  "SAAS",
+  "SaaS",
   "Assessoria Financeira",
   "Special Situations",
 ];
@@ -35,7 +35,7 @@ const B2C_GROUP_ORDER = [
   "Marketing Engineering",
   "Education",
   "Micro Franquia",
-  "Franquia & Master",
+  "Franquia e Master",
 ];
 
 export const GROUP_ORDER: Record<LadderTrack, string[]> = {
@@ -50,7 +50,7 @@ export const TRACK_TITLE: Record<LadderTrack, string> = {
 
 export const TRACK_SUBTITLE: Record<LadderTrack, Record<string, string>> = {
   b2b: {
-    SAAS: "Escala & Produto Entrada",
+    SaaS: "Escala & Produto Entrada",
     "Assessoria Financeira": "Serviço | Gente | Processo",
   },
   b2c: {},

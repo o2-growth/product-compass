@@ -91,39 +91,17 @@ interface Props {
   activeTrack?: "b2b" | "b2c";
 }
 
-const TRACK_LABEL: Record<string, string> = {
-  b2b: "B2B · O2 Inc.",
-  b2c: "B2C · Oxy Hacker",
-  none: "Sem trilha",
-};
-
-export function ProductsSidebar({ onOpenProduct, activeTrack }: Props) {
+export function ProductsSidebar({ onOpenProduct }: Props) {
   const { data: products = [], isLoading } = useProducts();
   const [collapsed, setCollapsed] = useState(false);
   const [query, setQuery] = useState("");
 
-  const grouped = useMemo(() => {
-    const filtered = products.filter((p) =>
-      p.name.toLowerCase().includes(query.toLowerCase()),
-    );
-    const byTrack: Record<string, Record<string, Product[]>> = {
-      b2b: {},
-      b2c: {},
-      none: {},
-    };
-    for (const p of filtered) {
-      const t = p.ladder_track ?? "none";
-      const g = p.ladder_group ?? "Não classificado";
-      byTrack[t] = byTrack[t] || {};
-      byTrack[t][g] = byTrack[t][g] || [];
-      byTrack[t][g].push(p);
-    }
-    for (const t of Object.keys(byTrack)) {
-      for (const g of Object.keys(byTrack[t])) {
-        byTrack[t][g].sort((a, b) => (a.ladder_order ?? 0) - (b.ladder_order ?? 0));
-      }
-    }
-    return byTrack;
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const list = q
+      ? products.filter((p) => p.name.toLowerCase().includes(q))
+      : products;
+    return [...list].sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
   }, [products, query]);
 
   const totalTicket = useMemo(
@@ -149,10 +127,6 @@ export function ProductsSidebar({ onOpenProduct, activeTrack }: Props) {
       </aside>
     );
   }
-
-  const trackOrder: Array<"b2b" | "b2c" | "none"> = activeTrack
-    ? [activeTrack, activeTrack === "b2b" ? "b2c" : "b2b", "none"]
-    : ["b2b", "b2c", "none"];
 
   return (
     <aside className="flex w-72 shrink-0 flex-col border-r bg-muted/20">
@@ -189,32 +163,18 @@ export function ProductsSidebar({ onOpenProduct, activeTrack }: Props) {
       <div className="flex-1 overflow-y-auto px-2 py-3">
         {isLoading ? (
           <div className="px-2 text-xs text-muted-foreground">Carregando...</div>
+        ) : filtered.length === 0 ? (
+          <div className="px-2 text-xs text-muted-foreground">
+            Nenhum produto encontrado.
+          </div>
         ) : (
-          trackOrder.map((track) => {
-            const groups = grouped[track];
-            if (!groups || Object.keys(groups).length === 0) return null;
-            return (
-              <div key={track} className="mb-4">
-                <div className="px-2 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                  {TRACK_LABEL[track]}
-                </div>
-                {Object.entries(groups).map(([groupName, items]) => (
-                  <div key={groupName} className="mb-2">
-                    <div className="px-2 pb-1 text-[11px] font-semibold text-foreground/80">
-                      {groupName}
-                    </div>
-                    <ul className="space-y-0.5">
-                      {items.map((p) => (
-                        <li key={p.id}>
-                          <DraggableSidebarItem product={p} onOpen={onOpenProduct} />
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            );
-          })
+          <ul className="space-y-0.5">
+            {filtered.map((p) => (
+              <li key={p.id}>
+                <DraggableSidebarItem product={p} onOpen={onOpenProduct} />
+              </li>
+            ))}
+          </ul>
         )}
       </div>
     </aside>
