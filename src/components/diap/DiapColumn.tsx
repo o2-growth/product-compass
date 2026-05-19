@@ -4,6 +4,8 @@ import { GripVertical, Plus, Sparkles, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { DiapColumn, DiapProduct } from "@/hooks/useDiap";
 import { formatTicket } from "@/hooks/useLadder";
+import { EditableText } from "@/components/ui/editable-text";
+import { useRenameProduct } from "@/hooks/useScale";
 
 interface Props {
   column: DiapColumn;
