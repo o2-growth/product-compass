@@ -92,12 +92,12 @@ export function LadderStep({
   const bottom = `${50 + stepIndex * STEP_DELTA_Y}px`;
   const subtitle = TRACK_SUBTITLE[track]?.[group.name];
 
-  // Tiles include products + 1 "add" tile, wrapped in rows of MAX_PER_ROW
-  const tiles = group.products.length + 1;
-  const cols = Math.min(MAX_PER_ROW, tiles);
+  // Tiles are only real products, wrapped in rows of MAX_PER_ROW
+  const tiles = group.products.length;
+  const cols = Math.min(MAX_PER_ROW, Math.max(tiles, 1));
   const innerWidth = cols * CARD_W + (cols - 1) * CARD_GAP + PAD * 2;
 
-  // Build rows of indices [0..tiles-1] (last index = add button)
+  // Build rows of product indices only
   const rows: number[][] = [];
   for (let i = 0; i < tiles; i += MAX_PER_ROW) {
     rows.push(Array.from({ length: Math.min(MAX_PER_ROW, tiles - i) }, (_, k) => i + k));
@@ -163,25 +163,9 @@ export function LadderStep({
             <div className="flex" style={{ gap: CARD_GAP }}>
               {row.map((idx) => {
                 const p = group.products[idx];
-                if (p) {
-                  return <DraggableCard key={p.id} product={p} onOpen={onOpenProduct} />;
-                }
-                return (
-                  <button
-                    key={`add-${idx}`}
-                    type="button"
-                    onClick={() => onAddProduct(group.name)}
-                    title={`Adicionar produto em ${group.name}`}
-                    aria-label={`Adicionar produto em ${group.name}`}
-                    className="flex cursor-pointer flex-col items-center justify-center rounded-sm border border-dashed border-neutral-500/70 bg-white/40 text-neutral-600 outline-none transition-all duration-150 hover:scale-[1.04] hover:border-neutral-800 hover:bg-white hover:text-neutral-900 focus-visible:ring-2 focus-visible:ring-neutral-900"
-                    style={{ width: CARD_W, height: CARD_H }}
-                  >
-                    <Plus className="h-5 w-5" />
-                    <span className="mt-1 text-[10px] font-semibold leading-tight">
-                      Novo produto
-                    </span>
-                  </button>
-                );
+                return p ? (
+                  <DraggableCard key={p.id} product={p} onOpen={onOpenProduct} />
+                ) : null;
               })}
             </div>
           </div>
@@ -192,8 +176,8 @@ export function LadderStep({
 }
 
 export function getStepWidth(productsCount: number): number {
-  const tiles = productsCount + 1;
-  const cols = Math.min(MAX_PER_ROW, tiles);
+  const tiles = productsCount;
+  const cols = Math.min(MAX_PER_ROW, Math.max(tiles, 1));
   return cols * CARD_W + (cols - 1) * CARD_GAP + PAD * 2;
 }
 
