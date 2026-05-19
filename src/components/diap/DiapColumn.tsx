@@ -163,7 +163,6 @@ function DiapCard({
       >
         <div className="mb-3 flex items-start justify-between">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-deep/5 text-base">
-            {/* @ts-expect-error icon vem livre do produto */}
             {product.icon || "📦"}
           </div>
         </div>
