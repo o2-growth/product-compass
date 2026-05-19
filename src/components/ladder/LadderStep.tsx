@@ -176,8 +176,8 @@ export function LadderStep({
 }
 
 export function getStepWidth(productsCount: number): number {
-  const tiles = productsCount + 1;
-  const cols = Math.min(MAX_PER_ROW, tiles);
+  const tiles = productsCount;
+  const cols = Math.min(MAX_PER_ROW, Math.max(tiles, 1));
   return cols * CARD_W + (cols - 1) * CARD_GAP + PAD * 2;
 }
 
