@@ -24,13 +24,27 @@ export function useProducts() {
   return useQuery({
     queryKey: PRODUCTS_KEY,
     queryFn: async (): Promise<Product[]> => {
+      // Query principal — só products + tiers (sempre existem).
       const { data, error } = await supabase
         .from("products")
-        .select(
-          "*, product_tiers ( tier_id ), product_ladder_placements ( id, product_id, ladder_track, ladder_group, ladder_order )",
-        )
+        .select("*, product_tiers ( tier_id )")
         .order("position_index", { ascending: true });
       if (error) throw error;
+
+      // Placements em query separada pra tolerar tabela inexistente (PGRST205)
+      let placementsByProduct = new Map<string, any[]>();
+      const { data: placements, error: placementsError } = await supabase
+        .from("product_ladder_placements")
+        .select("id, product_id, ladder_track, ladder_group, ladder_order");
+      if (!placementsError && placements) {
+        for (const lp of placements as any[]) {
+          if (!placementsByProduct.has(lp.product_id))
+            placementsByProduct.set(lp.product_id, []);
+          placementsByProduct.get(lp.product_id)!.push(lp);
+        }
+      }
+      // se placementsError (tabela não existe), seguimos sem placements
+
       return (data ?? []).map((p: any) => ({
         ...p,
         scope_items: p.scope_items ?? [],
@@ -41,7 +55,7 @@ export function useProducts() {
         tier_ids: (p.product_tiers ?? [])
           .map((pt: any) => pt.tier_id)
           .filter(Boolean),
-        ladder_placements: (p.product_ladder_placements ?? []).map((lp: any) => ({
+        ladder_placements: (placementsByProduct.get(p.id) ?? []).map((lp: any) => ({
           id: lp.id,
           product_id: lp.product_id,
           ladder_track: lp.ladder_track,

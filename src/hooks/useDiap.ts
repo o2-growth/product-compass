@@ -34,7 +34,17 @@ export function useDiap() {
           "id, diap_column, order_index, products!inner ( id, name, icon, avg_ticket, status )",
         )
         .order("order_index", { ascending: true });
-      if (error) throw error;
+
+      // Se tabela ainda não existe, devolve colunas vazias em vez de quebrar
+      if (error) {
+        const tableMissing =
+          (error as any).code === "PGRST205" ||
+          /Could not find the table|does not exist/i.test(error.message ?? "");
+        if (tableMissing) {
+          return DIAP_COLUMNS.map((column) => ({ column, products: [] }));
+        }
+        throw error;
+      }
 
       const map = new Map<string, DiapProduct[]>();
       for (const row of (data ?? []) as any[]) {
