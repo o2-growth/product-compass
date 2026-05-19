@@ -47,78 +47,10 @@ export type Database = {
           },
         ]
       }
-      product_diap_placements: {
-        Row: {
-          id: string
-          product_id: string
-          diap_column: string
-          order_index: number | null
-          created_at: string | null
-        }
-        Insert: {
-          id?: string
-          product_id: string
-          diap_column: string
-          order_index?: number | null
-          created_at?: string | null
-        }
-        Update: {
-          id?: string
-          product_id?: string
-          diap_column?: string
-          order_index?: number | null
-          created_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "product_diap_placements_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      product_ladder_placements: {
-        Row: {
-          id: string
-          product_id: string
-          ladder_track: string
-          ladder_group: string
-          ladder_order: number | null
-          created_at: string | null
-        }
-        Insert: {
-          id?: string
-          product_id: string
-          ladder_track: string
-          ladder_group: string
-          ladder_order?: number | null
-          created_at?: string | null
-        }
-        Update: {
-          id?: string
-          product_id?: string
-          ladder_track?: string
-          ladder_group?: string
-          ladder_order?: number | null
-          created_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "product_ladder_placements_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       products: {
         Row: {
           avg_ticket: number | null
           created_at: string | null
-          created_by: string | null
           description: string | null
           icon: string | null
           id: string
@@ -135,7 +67,6 @@ export type Database = {
         Insert: {
           avg_ticket?: number | null
           created_at?: string | null
-          created_by?: string | null
           description?: string | null
           icon?: string | null
           id?: string
@@ -152,7 +83,6 @@ export type Database = {
         Update: {
           avg_ticket?: number | null
           created_at?: string | null
-          created_by?: string | null
           description?: string | null
           icon?: string | null
           id?: string
