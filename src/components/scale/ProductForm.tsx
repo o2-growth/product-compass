@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import type { ProductFormData, Tier } from "@/types/scale";
 import { STATUS_OPTIONS } from "@/hooks/useScale";
+import { GROUP_ORDER, type LadderTrack } from "@/hooks/useLadder";
 
 const EMPTY: ProductFormData = {
   name: "",
@@ -224,9 +225,15 @@ export function ProductForm({
           <div className="mt-2 grid grid-cols-[120px_1fr_80px] gap-2">
             <Select
               value={form.ladder_track ?? "none"}
-              onValueChange={(v) =>
-                update("ladder_track", v === "none" ? null : (v as any))
-              }
+              onValueChange={(v) => {
+                const next = v === "none" ? null : (v as LadderTrack);
+                update("ladder_track", next);
+                // Limpa grupo se não pertence à nova trilha
+                if (next && form.ladder_group && !GROUP_ORDER[next].includes(form.ladder_group)) {
+                  update("ladder_group", "");
+                }
+                if (!next) update("ladder_group", "");
+              }}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Trilha" />
@@ -237,12 +244,24 @@ export function ProductForm({
                 <SelectItem value="b2c">B2C</SelectItem>
               </SelectContent>
             </Select>
-            <Input
-              placeholder="Grupo (ex: SAAS, Special Situations)"
-              value={form.ladder_group}
-              onChange={(e) => update("ladder_group", e.target.value)}
+            <Select
+              value={form.ladder_group || "none"}
+              onValueChange={(v) => update("ladder_group", v === "none" ? "" : v)}
               disabled={!form.ladder_track}
-            />
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Categoria" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Sem categoria</SelectItem>
+                {form.ladder_track &&
+                  GROUP_ORDER[form.ladder_track].map((g) => (
+                    <SelectItem key={g} value={g}>
+                      {g}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
             <Input
               type="number"
               placeholder="Ordem"
