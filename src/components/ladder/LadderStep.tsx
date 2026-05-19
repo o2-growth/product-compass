@@ -92,12 +92,17 @@ export function LadderStep({
   const bottom = `${50 + stepIndex * STEP_DELTA_Y}px`;
   const subtitle = TRACK_SUBTITLE[track]?.[group.name];
 
-  // +1 to reserve space for the "add" tile in the row
-  const tileCount = group.products.length + 1;
-  const innerWidth =
-    tileCount * CARD_W + (tileCount - 1) * CARD_GAP + PAD * 2;
+  // Tiles include products + 1 "add" tile, wrapped in rows of MAX_PER_ROW
+  const tiles = group.products.length + 1;
+  const cols = Math.min(MAX_PER_ROW, tiles);
+  const innerWidth = cols * CARD_W + (cols - 1) * CARD_GAP + PAD * 2;
 
-  // Bloco amarelo é o droppable. Drop muda o grupo do produto via mutation no parent.
+  // Build rows of indices [0..tiles-1] (last index = add button)
+  const rows: number[][] = [];
+  for (let i = 0; i < tiles; i += MAX_PER_ROW) {
+    rows.push(Array.from({ length: Math.min(MAX_PER_ROW, tiles - i) }, (_, k) => i + k));
+  }
+
   const { setNodeRef, isOver } = useDroppable({
     id: `group:${group.name}`,
     data: { type: "ladder-group", group: group.name, track },
@@ -137,46 +142,59 @@ export function LadderStep({
           width: innerWidth,
         }}
       >
-        <div className="mb-1.5 flex" style={{ gap: CARD_GAP }}>
-          {group.products.map((p) => (
-            <div
-              key={`t-${p.id}`}
-              className="text-[10px] font-medium leading-tight text-neutral-700"
-              style={{ width: CARD_W }}
-            >
-              {formatTicket(p.avg_ticket)}
+        {rows.map((row, rIdx) => (
+          <div key={`row-${rIdx}`} className={cn(rIdx > 0 && "mt-2")}>
+            {/* Tickets row */}
+            <div className="mb-1.5 flex" style={{ gap: CARD_GAP }}>
+              {row.map((idx) => {
+                const p = group.products[idx];
+                return (
+                  <div
+                    key={`t-${idx}`}
+                    className="text-[10px] font-medium leading-tight text-neutral-700"
+                    style={{ width: CARD_W }}
+                  >
+                    {p ? formatTicket(p.avg_ticket) : ""}
+                  </div>
+                );
+              })}
             </div>
-          ))}
-          <div style={{ width: CARD_W }} />
-        </div>
-
-        <div className="flex" style={{ gap: CARD_GAP }}>
-          {group.products.map((p) => (
-            <DraggableCard key={p.id} product={p} onOpen={onOpenProduct} />
-          ))}
-
-          <button
-            type="button"
-            onClick={() => onAddProduct(group.name)}
-            title={`Adicionar produto em ${group.name}`}
-            aria-label={`Adicionar produto em ${group.name}`}
-            className="flex cursor-pointer flex-col items-center justify-center rounded-sm border border-dashed border-neutral-500/70 bg-white/40 text-neutral-600 outline-none transition-all duration-150 hover:scale-[1.04] hover:border-neutral-800 hover:bg-white hover:text-neutral-900 focus-visible:ring-2 focus-visible:ring-neutral-900"
-            style={{ width: CARD_W, height: 96 }}
-          >
-            <Plus className="h-5 w-5" />
-            <span className="mt-1 text-[10px] font-semibold leading-tight">
-              Novo produto
-            </span>
-          </button>
-        </div>
+            {/* Cards row */}
+            <div className="flex" style={{ gap: CARD_GAP }}>
+              {row.map((idx) => {
+                const p = group.products[idx];
+                if (p) {
+                  return <DraggableCard key={p.id} product={p} onOpen={onOpenProduct} />;
+                }
+                return (
+                  <button
+                    key={`add-${idx}`}
+                    type="button"
+                    onClick={() => onAddProduct(group.name)}
+                    title={`Adicionar produto em ${group.name}`}
+                    aria-label={`Adicionar produto em ${group.name}`}
+                    className="flex cursor-pointer flex-col items-center justify-center rounded-sm border border-dashed border-neutral-500/70 bg-white/40 text-neutral-600 outline-none transition-all duration-150 hover:scale-[1.04] hover:border-neutral-800 hover:bg-white hover:text-neutral-900 focus-visible:ring-2 focus-visible:ring-neutral-900"
+                    style={{ width: CARD_W, height: CARD_H }}
+                  >
+                    <Plus className="h-5 w-5" />
+                    <span className="mt-1 text-[10px] font-semibold leading-tight">
+                      Novo produto
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
 }
 
 export function getStepWidth(productsCount: number): number {
-  const count = productsCount + 1;
-  return count * CARD_W + (count - 1) * CARD_GAP + PAD * 2;
+  const tiles = productsCount + 1;
+  const cols = Math.min(MAX_PER_ROW, tiles);
+  return cols * CARD_W + (cols - 1) * CARD_GAP + PAD * 2;
 }
 
 export function getStepLefts(groups: LadderGroup[]): number[] {
