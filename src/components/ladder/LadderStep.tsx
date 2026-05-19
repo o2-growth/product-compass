@@ -98,11 +98,13 @@ function DraggableCard({
       />
       <div className="pointer-events-none relative flex h-full flex-col p-1.5">
         <div className="ml-3.5 mt-0.5 text-base leading-none">{product.icon || "📦"}</div>
-        <div className="pointer-events-auto mt-1 text-[10px] font-semibold leading-tight text-neutral-900">
+        <div className="pointer-events-auto mt-1 w-full text-[10px] font-semibold leading-tight text-neutral-900">
           <EditableText
             value={product.name}
             onSave={(name) => rename.mutateAsync({ id: product.id, name })}
             ariaLabel="Renomear produto"
+            as="div"
+            clamp
             className="block w-full"
             inputClassName="text-[10px] font-semibold"
           />
