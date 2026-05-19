@@ -131,6 +131,11 @@ export function Canvas() {
           </Select>
         </div>
 
+        <Link to="/ladder">
+          <Button variant="outline" className="gap-1.5">
+            <LayoutGrid className="h-4 w-4" /> Value Ladder
+          </Button>
+        </Link>
         <Button onClick={() => openCreate()} className="gap-1.5">
           <Plus className="h-4 w-4" /> Novo produto
         </Button>
