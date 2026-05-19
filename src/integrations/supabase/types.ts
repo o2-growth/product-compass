@@ -55,6 +55,9 @@ export type Database = {
           icon: string | null
           id: string
           internal_notes: string | null
+          ladder_group: string | null
+          ladder_order: number | null
+          ladder_track: string | null
           name: string
           position_index: number | null
           scope_items: string[] | null
@@ -68,6 +71,9 @@ export type Database = {
           icon?: string | null
           id?: string
           internal_notes?: string | null
+          ladder_group?: string | null
+          ladder_order?: number | null
+          ladder_track?: string | null
           name: string
           position_index?: number | null
           scope_items?: string[] | null
@@ -81,6 +87,9 @@ export type Database = {
           icon?: string | null
           id?: string
           internal_notes?: string | null
+          ladder_group?: string | null
+          ladder_order?: number | null
+          ladder_track?: string | null
           name?: string
           position_index?: number | null
           scope_items?: string[] | null
