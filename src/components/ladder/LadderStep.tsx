@@ -85,7 +85,7 @@ export function getStepLefts(groups: LadderGroup[]): number[] {
   for (let i = 0; i < groups.length; i++) {
     lefts.push(cursor);
     const w = getStepWidth(groups[i].products.length);
-    cursor += Math.max(w * 0.5, 160);
+    cursor += Math.max(w * 0.6, 180);
   }
   return lefts;
 }
