@@ -17,7 +17,7 @@ function DraggableSidebarItem({
   onOpen?: (id: string) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } =
-    useDraggable({ id: product.id, data: { type: "ladder-product" } });
+    useDraggable({ id: `sidebar:${product.id}`, data: { type: "ladder-product", productId: product.id } });
 
   return (
     <div
