@@ -1,15 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Canvas } from "@/components/scale/Canvas";
+import { ValueLadder } from "@/components/ladder/ValueLadder";
 
 export const Route = createFileRoute("/")({
-  component: Canvas,
+  component: ValueLadder,
   head: () => ({
     meta: [
       { title: "Product Scale Platform — O2 Inc." },
       {
         name: "description",
         content:
-          "Plataforma interna da O2 Inc. para visualizar e gerir o portfólio de produtos por tier de faturamento.",
+          "Plataforma interna da O2 Inc. para visualizar e gerir o portfólio de produtos.",
       },
     ],
   }),

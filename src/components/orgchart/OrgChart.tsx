@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft, Layers, Plus } from "lucide-react";
+import { Home, Layers, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useProducts, useTiers } from "@/hooks/useScale";
 import { ProductDrawer } from "@/components/scale/ProductDrawer";
@@ -210,7 +210,7 @@ export function OrgChart() {
         <div className="flex items-center gap-2">
           <Link to="/">
             <Button variant="ghost" size="sm" className="gap-1.5">
-              <ArrowLeft className="h-4 w-4" /> Kanban
+              <Home className="h-4 w-4" /> Home
             </Button>
           </Link>
           <div className="ml-2 flex h-8 w-8 items-center justify-center rounded-lg bg-status-active font-bold text-tier-header">
