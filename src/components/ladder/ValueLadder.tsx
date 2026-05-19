@@ -17,6 +17,7 @@ import {
 } from "@/hooks/useScale";
 import { ProductDrawer } from "@/components/scale/ProductDrawer";
 import { LadderStep, getStepLefts, getStepWidth, STEP_DELTA_Y } from "./LadderStep";
+import { ProductsSidebar } from "./ProductsSidebar";
 
 type DrawerMode = "create" | "edit" | null;
 
@@ -138,9 +139,12 @@ export function ValueLadder() {
         </div>
       </header>
 
-      {/* Canvas */}
-      <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-        <main className="relative flex-1 overflow-auto">
+      {/* Body: sidebar + canvas */}
+      <div className="flex flex-1 overflow-hidden">
+        <ProductsSidebar onOpenProduct={openEdit} activeTrack={track} />
+
+        <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+          <main className="relative flex-1 overflow-auto">
           {(() => {
             const lefts = groups.length ? getStepLefts(groups) : [];
             const last = groups[groups.length - 1];
@@ -230,6 +234,7 @@ export function ValueLadder() {
           })()}
         </main>
       </DndContext>
+      </div>
 
       <ProductDrawer
         mode={drawerMode}
