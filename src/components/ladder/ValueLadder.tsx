@@ -66,7 +66,8 @@ export function ValueLadder() {
       | { type: string; group: string; track: LadderTrack }
       | undefined;
     if (!overData || overData.type !== "ladder-group") return;
-    const productId = String(active.id);
+    const rawId = String(active.id);
+    const productId = rawId.startsWith("sidebar:") ? rawId.slice("sidebar:".length) : rawId;
     const product = products.find((p) => p.id === productId);
     if (!product) return;
     if (product.ladder_track === overData.track && product.ladder_group === overData.group)
