@@ -1,14 +1,25 @@
 import { useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Search, GripVertical } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search, GripVertical, Trash2 } from "lucide-react";
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import { useProducts, useRenameProduct, useToggleProductActive } from "@/hooks/useScale";
+import { useProducts, useRenameProduct, useToggleProductActive, useDeleteProduct } from "@/hooks/useScale";
 import { STATUS_DOT, STATUS_LABEL, type Product } from "@/types/scale";
 import { formatTicket } from "@/hooks/useLadder";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { EditableText } from "@/components/ui/editable-text";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 
 function DraggableSidebarItem({
