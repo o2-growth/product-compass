@@ -460,6 +460,6 @@ export function OrgChart() {
           z-index: 1;
         }
       `}</style>
-    </div>
+    </>
   );
 }
