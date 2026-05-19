@@ -49,7 +49,7 @@ export function ValueLadder() {
       {/* Canvas */}
       <main className="relative flex-1 overflow-auto">
         <div
-          className="relative mx-auto h-full min-h-[800px] w-full min-w-[1400px]"
+          className="relative mx-auto h-full min-h-[800px] w-full min-w-[1700px]"
           style={{
             backgroundImage:
               "linear-gradient(to right, rgba(0,0,0,0.045) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.045) 1px, transparent 1px)",
