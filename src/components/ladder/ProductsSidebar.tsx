@@ -60,11 +60,16 @@ function DraggableSidebarItem({
             />
             <span
               className={cn(
-                "truncate font-medium",
+                "min-w-0 flex-1 font-medium",
                 !isActive && "line-through text-muted-foreground",
               )}
             >
-              {product.name}
+              <EditableText
+                value={product.name}
+                onSave={(name) => rename.mutateAsync({ id: product.id, name })}
+                ariaLabel="Renomear produto"
+                inputClassName="text-xs font-medium"
+              />
             </span>
           </div>
           <div className="mt-0.5 text-[10px] text-muted-foreground">
