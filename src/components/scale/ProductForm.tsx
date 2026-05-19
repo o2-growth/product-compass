@@ -24,6 +24,9 @@ const EMPTY: ProductFormData = {
   icon: "📦",
   internal_notes: "",
   tier_ids: [],
+  ladder_track: null,
+  ladder_group: "",
+  ladder_order: null,
 };
 
 interface Props {
@@ -210,6 +213,48 @@ export function ProductForm({
                 <span className="truncate">{t.name}</span>
               </label>
             ))}
+          </div>
+        </div>
+
+        <div className="rounded-lg border bg-muted/30 p-3">
+          <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Value Ladder
+          </Label>
+          <div className="mt-2 grid grid-cols-[120px_1fr_80px] gap-2">
+            <Select
+              value={form.ladder_track ?? "none"}
+              onValueChange={(v) =>
+                update("ladder_track", v === "none" ? null : (v as any))
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Trilha" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Sem trilha</SelectItem>
+                <SelectItem value="b2b">B2B</SelectItem>
+                <SelectItem value="b2c">B2C</SelectItem>
+              </SelectContent>
+            </Select>
+            <Input
+              placeholder="Grupo (ex: SAAS, Special Situations)"
+              value={form.ladder_group}
+              onChange={(e) => update("ladder_group", e.target.value)}
+              disabled={!form.ladder_track}
+            />
+            <Input
+              type="number"
+              placeholder="Ordem"
+              min={0}
+              value={form.ladder_order ?? ""}
+              onChange={(e) =>
+                update(
+                  "ladder_order",
+                  e.target.value === "" ? null : Number(e.target.value),
+                )
+              }
+              disabled={!form.ladder_track}
+            />
           </div>
         </div>
 

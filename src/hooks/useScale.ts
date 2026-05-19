@@ -32,6 +32,9 @@ export function useProducts() {
       return (data ?? []).map((p: any) => ({
         ...p,
         scope_items: p.scope_items ?? [],
+        ladder_track: p.ladder_track ?? null,
+        ladder_group: p.ladder_group ?? null,
+        ladder_order: p.ladder_order ?? null,
         tier_ids: (p.product_tiers ?? [])
           .map((pt: any) => pt.tier_id)
           .filter(Boolean),
@@ -66,6 +69,9 @@ export function useCreateProduct() {
           status: form.status,
           icon: form.icon || "📦",
           internal_notes: form.internal_notes || null,
+          ladder_track: form.ladder_track,
+          ladder_group: form.ladder_group || null,
+          ladder_order: form.ladder_order ?? 0,
         })
         .select()
         .single();
@@ -75,6 +81,7 @@ export function useCreateProduct() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: PRODUCTS_KEY });
+      qc.invalidateQueries({ queryKey: ["ladder"] });
       toast.success("Produto criado");
     },
     onError: (e: any) => toast.error(e.message ?? "Erro ao criar"),
@@ -101,6 +108,9 @@ export function useUpdateProduct() {
           status: form.status,
           icon: form.icon || "📦",
           internal_notes: form.internal_notes || null,
+          ladder_track: form.ladder_track,
+          ladder_group: form.ladder_group || null,
+          ladder_order: form.ladder_order ?? 0,
         })
         .eq("id", id);
       if (error) throw error;
@@ -108,6 +118,7 @@ export function useUpdateProduct() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: PRODUCTS_KEY });
+      qc.invalidateQueries({ queryKey: ["ladder"] });
       toast.success("Produto atualizado");
     },
     onError: (e: any) => toast.error(e.message ?? "Erro ao salvar"),
@@ -123,9 +134,45 @@ export function useDeleteProduct() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: PRODUCTS_KEY });
+      qc.invalidateQueries({ queryKey: ["ladder"] });
       toast.success("Produto removido");
     },
     onError: (e: any) => toast.error(e.message ?? "Erro ao remover"),
+  });
+}
+
+export function useMoveProductToLadderGroup() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      productId,
+      track,
+      group,
+    }: {
+      productId: string;
+      track: "b2b" | "b2c";
+      group: string;
+    }) => {
+      const { error } = await supabase
+        .from("products")
+        .update({ ladder_track: track, ladder_group: group })
+        .eq("id", productId);
+      if (error) throw error;
+    },
+    onMutate: async ({ productId, track, group }) => {
+      await qc.cancelQueries({ queryKey: ["ladder", track] });
+      const prev = qc.getQueryData(["ladder", track]);
+      qc.setQueriesData<any>({ queryKey: ["ladder"] }, (old: any) => {
+        if (!Array.isArray(old)) return old;
+        return old;
+      });
+      return { prev };
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Erro ao mover na ladder"),
+    onSettled: (_d, _e, vars) => {
+      qc.invalidateQueries({ queryKey: ["ladder", vars.track] });
+      qc.invalidateQueries({ queryKey: PRODUCTS_KEY });
+    },
   });
 }
 

@@ -1,4 +1,5 @@
 export type ProductStatus = "active" | "development" | "planned";
+export type LadderTrack = "b2b" | "b2c";
 
 export interface Tier {
   id: string;
@@ -23,6 +24,9 @@ export interface Product {
   created_at: string;
   updated_at: string;
   tier_ids: string[];
+  ladder_track: LadderTrack | null;
+  ladder_group: string | null;
+  ladder_order: number | null;
 }
 
 export interface ProductFormData {
@@ -34,10 +38,19 @@ export interface ProductFormData {
   icon: string;
   internal_notes: string;
   tier_ids: string[];
+  ladder_track: LadderTrack | null;
+  ladder_group: string;
+  ladder_order: number | null;
 }
 
 export const STATUS_LABEL: Record<ProductStatus, string> = {
   active: "Ativo",
   development: "Em desenvolvimento",
   planned: "Planejado",
+};
+
+export const STATUS_DOT: Record<ProductStatus, string> = {
+  active: "bg-status-active",
+  development: "bg-status-development",
+  planned: "bg-status-planned",
 };

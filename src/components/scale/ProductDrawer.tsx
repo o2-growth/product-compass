@@ -17,6 +17,8 @@ interface Props {
   mode: "create" | "edit" | null;
   product?: Product;
   defaultTierId?: string;
+  defaultLadderTrack?: "b2b" | "b2c" | null;
+  defaultLadderGroup?: string;
   tiers: Tier[];
   onClose: () => void;
 }
@@ -25,6 +27,8 @@ export function ProductDrawer({
   mode,
   product,
   defaultTierId,
+  defaultLadderTrack,
+  defaultLadderGroup,
   tiers,
   onClose,
 }: Props) {
@@ -45,9 +49,16 @@ export function ProductDrawer({
           icon: product.icon,
           internal_notes: product.internal_notes ?? "",
           tier_ids: product.tier_ids,
+          ladder_track: product.ladder_track,
+          ladder_group: product.ladder_group ?? "",
+          ladder_order: product.ladder_order,
         }
       : mode === "create"
-        ? { tier_ids: defaultTierId ? [defaultTierId] : [] }
+        ? {
+            tier_ids: defaultTierId ? [defaultTierId] : [],
+            ladder_track: defaultLadderTrack ?? null,
+            ladder_group: defaultLadderGroup ?? "",
+          }
         : undefined;
 
   const handleSubmit = async (form: ProductFormData) => {

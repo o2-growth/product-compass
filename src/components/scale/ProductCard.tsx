@@ -1,16 +1,8 @@
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { Product } from "@/types/scale";
-import { STATUS_LABEL } from "@/types/scale";
-
-const statusClasses: Record<Product["status"], string> = {
-  active: "bg-status-active/20 text-foreground border-status-active/40",
-  development:
-    "bg-status-development/20 text-foreground border-status-development/40",
-  planned: "bg-status-planned/20 text-foreground border-status-planned/40",
-};
+import { STATUS_LABEL, STATUS_DOT } from "@/types/scale";
 
 interface Props {
   product: Product;
@@ -32,8 +24,10 @@ export function ProductCard({ product, dimmed, onOpen }: Props) {
       ref={setNodeRef}
       style={style}
       className={cn(
-        "group rounded-lg border bg-card p-3 shadow-sm transition-shadow",
-        "hover:shadow-md cursor-grab active:cursor-grabbing",
+        "group rounded-lg border border-border/70 bg-card p-3 shadow-card",
+        "transition-all duration-150 ease-out",
+        "hover:shadow-card-hover hover:-translate-y-px hover:border-foreground/15",
+        "cursor-grab active:cursor-grabbing",
       )}
       {...attributes}
       {...listeners}
@@ -43,25 +37,39 @@ export function ProductCard({ product, dimmed, onOpen }: Props) {
         e.stopPropagation();
       }}
     >
-      <div className="flex items-start gap-2">
-        <span className="text-2xl leading-none">{product.icon || "📦"}</span>
+      <div className="flex items-start gap-2.5">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted text-lg leading-none ring-1 ring-border/60">
+          <span>{product.icon || "📦"}</span>
+        </div>
         <div className="min-w-0 flex-1">
-          <div className="truncate text-sm font-semibold text-foreground">
+          <div className="truncate text-sm font-semibold text-foreground leading-tight">
             {product.name}
           </div>
-          <Badge
-            variant="outline"
-            className={cn("mt-1.5 text-[10px] font-medium", statusClasses[product.status])}
-          >
-            {STATUS_LABEL[product.status]}
-          </Badge>
+          <div className="mt-1 flex items-center gap-1.5">
+            <span
+              className={cn(
+                "inline-block h-1.5 w-1.5 rounded-full",
+                STATUS_DOT[product.status],
+              )}
+              aria-hidden
+            />
+            <span className="text-[10.5px] font-medium uppercase tracking-wide text-muted-foreground">
+              {STATUS_LABEL[product.status]}
+            </span>
+          </div>
+          {product.description && (
+            <p className="mt-1.5 line-clamp-2 text-[11.5px] leading-snug text-muted-foreground/90">
+              {product.description}
+            </p>
+          )}
         </div>
       </div>
       {product.avg_ticket != null && (
-        <div className="mt-2 text-xs text-muted-foreground">
-          Ticket médio:{" "}
-          <span className="font-medium text-foreground">
-            R$ {product.avg_ticket.toLocaleString("pt-BR")}
+        <div className="mt-2.5 flex items-center justify-between border-t border-border/60 pt-2 text-[11px]">
+          <span className="text-muted-foreground">Ticket médio</span>
+          <span className="font-semibold text-foreground tabular-nums">
+            <span className="text-muted-foreground font-normal mr-0.5">R$</span>
+            {product.avg_ticket.toLocaleString("pt-BR")}
           </span>
         </div>
       )}

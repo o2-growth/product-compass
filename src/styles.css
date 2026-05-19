@@ -71,7 +71,32 @@
   --status-active: var(--o2-green);
   --status-development: oklch(0.78 0.16 75);   /* amber */
   --status-planned: oklch(0.7 0.04 250);       /* slate */
+
+  /* Elevation tokens */
+  --shadow-card: 0 1px 2px 0 oklch(0 0 0 / 0.04), 0 1px 3px 0 oklch(0 0 0 / 0.06);
+  --shadow-card-hover: 0 4px 12px -2px oklch(0 0 0 / 0.08), 0 2px 4px -1px oklch(0 0 0 / 0.06);
+  --shadow-fab: 0 8px 24px -6px oklch(0.88 0.21 142 / 0.45), 0 4px 8px -2px oklch(0 0 0 / 0.12);
 }
+
+/* Subtle dot-grid pattern for canvas / tier drop area */
+.bg-dot-grid {
+  background-image: radial-gradient(circle, oklch(0.85 0 0 / 0.45) 1px, transparent 1px);
+  background-size: 18px 18px;
+  background-position: 0 0;
+}
+
+.bg-canvas-soft {
+  background-color: var(--canvas);
+  background-image:
+    radial-gradient(circle at 0 0, oklch(0.88 0.21 142 / 0.04), transparent 40%),
+    radial-gradient(circle at 100% 100%, oklch(0.7 0.04 250 / 0.05), transparent 45%),
+    radial-gradient(circle, oklch(0.82 0 0 / 0.35) 1px, transparent 1px);
+  background-size: auto, auto, 22px 22px;
+}
+
+.shadow-card { box-shadow: var(--shadow-card); }
+.shadow-card-hover { box-shadow: var(--shadow-card-hover); }
+.shadow-fab { box-shadow: var(--shadow-fab); }
 
 @layer base {
   * { border-color: var(--color-border); }

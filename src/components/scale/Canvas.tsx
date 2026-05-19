@@ -6,7 +6,7 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { Search, Plus, LayoutGrid } from "lucide-react";
+import { Search, Plus, LayoutGrid, Network, ChevronRight, Palette } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,7 @@ import {
 } from "@/hooks/useScale";
 import { TierColumn } from "./TierColumn";
 import { ProductDrawer } from "./ProductDrawer";
+import { cn } from "@/lib/utils";
 import type { ProductStatus } from "@/types/scale";
 
 export function Canvas() {
@@ -94,14 +95,24 @@ export function Canvas() {
   return (
     <div className="flex h-screen flex-col">
       {/* Header */}
-      <header className="flex items-center gap-3 border-b bg-background px-6 py-3">
-        <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-status-active font-bold text-tier-header">
-            O₂
+      <header className="flex items-center gap-3 border-b border-border/70 bg-background/95 backdrop-blur-sm px-6 py-3">
+        <div className="flex items-center gap-2.5">
+          <div
+            className={cn(
+              "relative flex h-8 w-8 items-center justify-center rounded-lg border border-status-active/30 bg-background font-bold text-[13px] text-foreground",
+              "shadow-[inset_0_0_0_1px_oklch(1_0_0),0_0_12px_-2px_oklch(0.88_0.21_142/0.55)]",
+            )}
+          >
+            <span className="relative z-10">O₂</span>
+            <span className="pointer-events-none absolute inset-0 rounded-lg bg-gradient-to-br from-status-active/15 to-transparent" />
           </div>
           <div>
-            <div className="text-sm font-semibold">Product Scale Platform</div>
-            <div className="text-[11px] text-muted-foreground">O2 Inc.</div>
+            <div className="text-sm font-semibold tracking-tight">Product Scale Platform</div>
+            <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+              <span>Portfolio</span>
+              <ChevronRight className="h-3 w-3 opacity-60" />
+              <span className="font-medium text-foreground/70">Kanban</span>
+            </div>
           </div>
         </div>
 
@@ -131,6 +142,16 @@ export function Canvas() {
           </Select>
         </div>
 
+        <Link to="/whiteboard">
+          <Button variant="outline" className="gap-1.5">
+            <Palette className="h-4 w-4" /> Whiteboard
+          </Button>
+        </Link>
+        <Link to="/orgchart">
+          <Button variant="outline" className="gap-1.5">
+            <Network className="h-4 w-4" /> Org Chart
+          </Button>
+        </Link>
         <Link to="/ladder">
           <Button variant="outline" className="gap-1.5">
             <LayoutGrid className="h-4 w-4" /> Value Ladder
@@ -142,7 +163,7 @@ export function Canvas() {
       </header>
 
       {/* Canvas */}
-      <main className="flex-1 overflow-hidden bg-canvas">
+      <main className="flex-1 overflow-hidden bg-canvas-soft">
         {isLoading ? (
           <div className="flex h-full items-center justify-center text-muted-foreground">
             Carregando portfólio...
@@ -168,10 +189,15 @@ export function Canvas() {
       {/* FAB */}
       <button
         onClick={() => openCreate()}
-        className="fixed bottom-6 right-6 flex h-14 w-14 items-center justify-center rounded-full bg-status-active text-tier-header shadow-lg transition-transform hover:scale-105"
+        className={cn(
+          "fixed bottom-6 right-6 flex h-14 w-14 items-center justify-center rounded-full text-tier-header shadow-fab",
+          "bg-gradient-to-br from-status-active to-[oklch(0.72_0.19_142)]",
+          "ring-1 ring-status-active/40 ring-offset-2 ring-offset-canvas",
+          "transition-all duration-200 ease-out hover:scale-[1.08] hover:shadow-card-hover active:scale-95",
+        )}
         aria-label="Adicionar produto"
       >
-        <Plus className="h-6 w-6" strokeWidth={2.5} />
+        <Plus className="h-6 w-6 drop-shadow-sm" strokeWidth={2.5} />
       </button>
 
       <ProductDrawer
