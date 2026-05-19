@@ -4,6 +4,8 @@ import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@/lib/utils";
 import type { LadderGroup, LadderTrack, LadderProduct } from "@/hooks/useLadder";
 import { TRACK_SUBTITLE, formatTicket } from "@/hooks/useLadder";
+import { EditableText } from "@/components/ui/editable-text";
+import { useRenameLadderGroup, useRenameProduct } from "@/hooks/useScale";
 
 const CARD_W = 108;
 const CARD_H = 96;
