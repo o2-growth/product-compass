@@ -163,25 +163,9 @@ export function LadderStep({
             <div className="flex" style={{ gap: CARD_GAP }}>
               {row.map((idx) => {
                 const p = group.products[idx];
-                if (p) {
-                  return <DraggableCard key={p.id} product={p} onOpen={onOpenProduct} />;
-                }
-                return (
-                  <button
-                    key={`add-${idx}`}
-                    type="button"
-                    onClick={() => onAddProduct(group.name)}
-                    title={`Adicionar produto em ${group.name}`}
-                    aria-label={`Adicionar produto em ${group.name}`}
-                    className="flex cursor-pointer flex-col items-center justify-center rounded-sm border border-dashed border-neutral-500/70 bg-white/40 text-neutral-600 outline-none transition-all duration-150 hover:scale-[1.04] hover:border-neutral-800 hover:bg-white hover:text-neutral-900 focus-visible:ring-2 focus-visible:ring-neutral-900"
-                    style={{ width: CARD_W, height: CARD_H }}
-                  >
-                    <Plus className="h-5 w-5" />
-                    <span className="mt-1 text-[10px] font-semibold leading-tight">
-                      Novo produto
-                    </span>
-                  </button>
-                );
+                return p ? (
+                  <DraggableCard key={p.id} product={p} onOpen={onOpenProduct} />
+                ) : null;
               })}
             </div>
           </div>
