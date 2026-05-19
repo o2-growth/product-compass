@@ -98,6 +98,38 @@ function DraggableSidebarItem({
         aria-label={isActive ? "Desativar produto" : "Ativar produto"}
         title={isActive ? "Desativar produto" : "Ativar produto"}
       />
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <button
+            type="button"
+            className="ml-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded text-muted-foreground opacity-0 transition-opacity hover:bg-red-500/10 hover:text-red-600 group-hover/item:opacity-100"
+            aria-label="Excluir produto"
+            title="Excluir produto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir produto?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Isso vai remover <span className="font-semibold">{product.name}</span> da
+              plataforma — incluindo todos os posicionamentos na Value Ladder e DIAP.
+              Essa ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 text-white hover:bg-red-700"
+              onClick={() => del.mutate(product.id)}
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
