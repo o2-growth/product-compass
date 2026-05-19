@@ -111,36 +111,41 @@ export function ProductsSidebar({ onOpenProduct }: Props) {
 
   if (collapsed) {
     return (
-      <aside className="flex w-10 shrink-0 flex-col items-center border-r bg-muted/30 py-3">
+      <aside className="flex w-12 shrink-0 flex-col items-center border-r border-emerald-deep/10 bg-white py-3">
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8"
+          className="h-8 w-8 text-emerald-deep"
           onClick={() => setCollapsed(false)}
           aria-label="Expandir lista de produtos"
         >
           <ChevronRight className="h-4 w-4" />
         </Button>
-        <div className="mt-3 rotate-180 text-[11px] font-semibold tracking-wider text-muted-foreground [writing-mode:vertical-rl]">
-          Produtos · {products.length}
+        <div className="mt-4 rotate-180 text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-deep/50 [writing-mode:vertical-rl]">
+          Inventário · {products.length}
         </div>
       </aside>
     );
   }
 
   return (
-    <aside className="flex w-72 shrink-0 flex-col border-r bg-muted/20">
-      <div className="flex items-center justify-between border-b px-3 py-2.5">
+    <aside className="flex w-72 shrink-0 flex-col border-r border-emerald-deep/10 bg-white">
+      <div className="flex items-center justify-between border-b border-emerald-deep/10 px-4 py-3">
         <div>
-          <div className="text-sm font-semibold">Produtos</div>
-          <div className="text-[11px] text-muted-foreground">
-            {products.length} itens · Ticket total {formatTicket(totalTicket)}
+          <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-deep/50">
+            Inventário
+          </div>
+          <div className="font-display text-sm font-semibold text-emerald-deep">
+            {products.length} produtos
+          </div>
+          <div className="mt-0.5 text-[10px] text-emerald-deep/50">
+            Ticket total {formatTicket(totalTicket)}
           </div>
         </div>
         <Button
           variant="ghost"
           size="icon"
-          className="h-7 w-7"
+          className="h-7 w-7 text-emerald-deep"
           onClick={() => setCollapsed(true)}
           aria-label="Recolher"
         >
@@ -148,14 +153,14 @@ export function ProductsSidebar({ onOpenProduct }: Props) {
         </Button>
       </div>
 
-      <div className="border-b px-3 py-2">
+      <div className="border-b border-emerald-deep/10 px-4 py-3">
         <div className="relative">
-          <Search className="absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+          <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-emerald-deep/40" />
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Buscar produto..."
-            className="h-8 pl-7 text-xs"
+            className="h-9 rounded-full border-emerald-deep/10 bg-cream/50 pl-8 text-xs"
           />
         </div>
       </div>
