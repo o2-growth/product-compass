@@ -139,9 +139,12 @@ export function ValueLadder() {
         </div>
       </header>
 
-      {/* Canvas */}
-      <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-        <main className="relative flex-1 overflow-auto">
+      {/* Body: sidebar + canvas */}
+      <div className="flex flex-1 overflow-hidden">
+        <ProductsSidebar onOpenProduct={openEdit} activeTrack={track} />
+
+        <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+          <main className="relative flex-1 overflow-auto">
           {(() => {
             const lefts = groups.length ? getStepLefts(groups) : [];
             const last = groups[groups.length - 1];
