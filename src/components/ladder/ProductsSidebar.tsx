@@ -182,27 +182,10 @@ export function ProductsSidebar({ onOpenProduct, activeTrack }: Props) {
                     <div className="px-2 pb-1 text-[11px] font-semibold text-foreground/80">
                       {groupName}
                     </div>
-                    <ul className="space-y-1">
+                    <ul className="space-y-0.5">
                       {items.map((p) => (
                         <li key={p.id}>
-                          <button
-                            onClick={() => onOpenProduct?.(p.id)}
-                            className="flex w-full items-start gap-2 rounded-md px-2 py-1.5 text-left text-xs transition-colors hover:bg-accent"
-                          >
-                            <span className="text-base leading-none">{p.icon}</span>
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-center gap-1.5">
-                                <span
-                                  className={`h-1.5 w-1.5 shrink-0 rounded-full ${STATUS_DOT[p.status]}`}
-                                  title={STATUS_LABEL[p.status]}
-                                />
-                                <span className="truncate font-medium">{p.name}</span>
-                              </div>
-                              <div className="mt-0.5 text-[10px] text-muted-foreground">
-                                {formatTicket(p.avg_ticket)}
-                              </div>
-                            </div>
-                          </button>
+                          <DraggableSidebarItem product={p} onOpen={onOpenProduct} />
                         </li>
                       ))}
                     </ul>
