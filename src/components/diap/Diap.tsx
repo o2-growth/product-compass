@@ -96,7 +96,7 @@ export function Diap() {
         actions={
           <Button
             size="sm"
-            className="gap-1.5 rounded-full bg-gold px-4 text-emerald-deep hover:bg-gold/90"
+            className="gap-1.5 rounded-full bg-emerald-deep px-4 text-background hover:bg-emerald-deep/90"
             onClick={openCreate}
           >
             <Plus className="h-4 w-4" /> Adicionar produto
