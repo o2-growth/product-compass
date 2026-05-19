@@ -376,6 +376,88 @@ export function useToggleProductActive() {
   });
 }
 
+/**
+ * Renomeia um produto. Como products.name é a fonte da verdade, todas as views
+ * (Value Ladder, DIAP, Sidebar) que fazem join com products refletem o novo
+ * nome automaticamente após invalidação das queries.
+ */
+export function useRenameProduct() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, name }: { id: string; name: string }) => {
+      const trimmed = name.trim();
+      if (!trimmed) throw new Error("Nome não pode ficar vazio");
+      const { error } = await supabase
+        .from("products")
+        .update({ name: trimmed })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onMutate: async ({ id, name }) => {
+      await qc.cancelQueries({ queryKey: PRODUCTS_KEY });
+      const prev = qc.getQueryData<Product[]>(PRODUCTS_KEY);
+      qc.setQueryData<Product[]>(PRODUCTS_KEY, (old) =>
+        old?.map((p) => (p.id === id ? { ...p, name: name.trim() } : p)),
+      );
+      return { prev };
+    },
+    onError: (e: any, _v, ctx) => {
+      if (ctx?.prev) qc.setQueryData(PRODUCTS_KEY, ctx.prev);
+      toast.error(e?.message ?? "Erro ao renomear");
+    },
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: PRODUCTS_KEY });
+      qc.invalidateQueries({ queryKey: ["ladder"] });
+      qc.invalidateQueries({ queryKey: ["diap"] });
+    },
+    onSuccess: () => toast.success("Produto renomeado"),
+  });
+}
+
+/**
+ * Renomeia uma categoria/grupo da Value Ladder dentro de uma trilha.
+ * Atualiza todos os placements (e legacy products.ladder_group) que apontam
+ * para o nome antigo dentro da mesma trilha.
+ */
+export function useRenameLadderGroup() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      track,
+      oldName,
+      newName,
+    }: {
+      track: "b2b" | "b2c";
+      oldName: string;
+      newName: string;
+    }) => {
+      const trimmed = newName.trim();
+      if (!trimmed) throw new Error("Nome não pode ficar vazio");
+      if (trimmed === oldName) return;
+      // Atualiza placements novos
+      const { error } = await supabase
+        .from("product_ladder_placements")
+        .update({ ladder_group: trimmed })
+        .eq("ladder_track", track)
+        .eq("ladder_group", oldName);
+      if (error && (error as any).code !== "PGRST205") throw error;
+      // Best-effort: atualiza coluna legacy em products (tolera ausência)
+      await supabase
+        .from("products")
+        .update({ ladder_group: trimmed })
+        .eq("ladder_track", track)
+        .eq("ladder_group", oldName);
+    },
+    onSuccess: (_d, vars) => {
+      qc.invalidateQueries({ queryKey: ["ladder", vars.track] });
+      qc.invalidateQueries({ queryKey: ["ladder"] });
+      qc.invalidateQueries({ queryKey: PRODUCTS_KEY });
+      toast.success("Categoria renomeada");
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Erro ao renomear categoria"),
+  });
+}
+
 export const STATUS_OPTIONS: { value: ProductStatus; label: string }[] = [
   { value: "active", label: "Ativo" },
   { value: "development", label: "Em desenvolvimento" },
