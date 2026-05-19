@@ -44,6 +44,7 @@ function DraggableCard({
       id: `placement:${product.placement_id}`,
       data: { type: "ladder-placement", placementId: product.placement_id, productId: product.id },
     });
+  const rename = useRenameProduct();
 
   return (
     <div
