@@ -1,73 +1,64 @@
 import type { LadderGroup, LadderTrack } from "@/hooks/useLadder";
 import { TRACK_SUBTITLE, formatTicket } from "@/hooks/useLadder";
 
+const CARD_W = 108;
+const CARD_GAP = 6;
+const PAD = 10;
+
 interface Props {
   group: LadderGroup;
+  leftPx: number;
   stepIndex: number;
-  totalSteps: number;
   track: LadderTrack;
 }
 
-/**
- * A single "step" of the value ladder — rendered as a yellow post-it
- * containing the group's title and a row of green product cards.
- * Positioned absolutely on the canvas so it climbs to the right & up.
- */
-export function LadderStep({ group, stepIndex, totalSteps, track }: Props) {
-  // Step layout: each step climbs to the right + up.
-  // Use smaller increments so big groups don't overflow the canvas.
-  const xStep = 13; // % per step
-  const yStep = 14; // % per step
-  const left = `${3 + stepIndex * xStep}%`;
-  const bottom = `${4 + stepIndex * yStep}%`;
-  void totalSteps;
-
+export function LadderStep({ group, leftPx, stepIndex, track }: Props) {
+  // Each step climbs vertically as it moves right
+  const bottom = `${60 + stepIndex * 110}px`;
   const subtitle = TRACK_SUBTITLE[track]?.[group.name];
 
   return (
     <div
       className="absolute"
-      style={{ left, bottom, transform: "translateZ(0)" }}
+      style={{ left: `${leftPx}px`, bottom }}
     >
-      {/* Group title */}
       <div className="mb-2 px-1">
-        <h3 className="text-base font-bold uppercase tracking-wide text-foreground">
+        <h3 className="text-sm font-bold uppercase tracking-wide text-foreground">
           {group.name}
         </h3>
         {subtitle && (
-          <p className="text-xs font-medium text-muted-foreground">
+          <p className="text-[11px] font-medium text-muted-foreground">
             {subtitle}
           </p>
         )}
       </div>
 
-      {/* Yellow post-it */}
       <div
-        className="rounded-sm p-2.5 shadow-[0_6px_18px_-8px_rgba(0,0,0,0.25)]"
+        className="rounded-sm shadow-[0_8px_20px_-10px_rgba(0,0,0,0.3)]"
         style={{
           background: "#FEF3A0",
-          minWidth: group.products.length * 108 + 20,
+          padding: PAD,
+          width: group.products.length * CARD_W + (group.products.length - 1) * CARD_GAP + PAD * 2,
         }}
       >
-        {/* Tickets row */}
-        <div className="mb-1.5 flex gap-1.5">
+        <div className="mb-1.5 flex" style={{ gap: CARD_GAP }}>
           {group.products.map((p) => (
             <div
               key={`t-${p.id}`}
-              className="w-[100px] text-[10px] font-medium leading-tight text-neutral-700"
+              className="text-[10px] font-medium leading-tight text-neutral-700"
+              style={{ width: CARD_W }}
             >
               {formatTicket(p.avg_ticket)}
             </div>
           ))}
         </div>
 
-        {/* Green product cards */}
-        <div className="flex gap-1.5">
+        <div className="flex" style={{ gap: CARD_GAP }}>
           {group.products.map((p) => (
             <div
               key={p.id}
-              className="flex h-[96px] w-[100px] flex-col rounded-sm p-1.5 shadow-sm"
-              style={{ background: "#A8E66C" }}
+              className="flex flex-col rounded-sm p-1.5 shadow-sm"
+              style={{ background: "#A8E66C", width: CARD_W, height: 96 }}
               title={p.name}
             >
               <div className="text-base leading-none">{p.icon || "📦"}</div>
@@ -80,4 +71,21 @@ export function LadderStep({ group, stepIndex, totalSteps, track }: Props) {
       </div>
     </div>
   );
+}
+
+export function getStepWidth(productsCount: number): number {
+  return productsCount * CARD_W + (productsCount - 1) * CARD_GAP + PAD * 2;
+}
+
+export function getStepLefts(groups: LadderGroup[]): number[] {
+  // Each step starts slightly to the right of the previous step's left,
+  // creating a staircase. Offset = max(step-width * 0.45, 140px).
+  const lefts: number[] = [];
+  let cursor = 0;
+  for (let i = 0; i < groups.length; i++) {
+    lefts.push(cursor);
+    const w = getStepWidth(groups[i].products.length);
+    cursor += Math.max(w * 0.5, 160);
+  }
+  return lefts;
 }
