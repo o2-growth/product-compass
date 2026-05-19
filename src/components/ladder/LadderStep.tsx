@@ -6,11 +6,13 @@ import type { LadderGroup, LadderTrack, LadderProduct } from "@/hooks/useLadder"
 import { TRACK_SUBTITLE, formatTicket } from "@/hooks/useLadder";
 
 const CARD_W = 108;
+const CARD_H = 96;
 const CARD_GAP = 6;
 const PAD = 10;
+const MAX_PER_ROW = 3;
 
-// Vertical step delta — must fit one title row (~22px) + subtitle (~16px) + the yellow block (~140px) + margin
-const STEP_DELTA_Y = 180;
+// Vertical step delta — fits title + subtitle + yellow block (depends on rows) + margin
+const STEP_DELTA_Y = 220;
 // Horizontal gap between yellow blocks (no overlap, evita "um em cima do outro")
 const STEP_GAP_X = 32;
 
