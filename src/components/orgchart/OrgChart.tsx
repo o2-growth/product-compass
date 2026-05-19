@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useProducts, useTiers } from "@/hooks/useScale";
@@ -179,6 +179,18 @@ export function OrgChart() {
     if (groupBy === "status") return buildTreeByStatus(products);
     return buildTreeByTier(products, tiers);
   }, [groupBy, products, tiers]);
+
+  // Inicializa tudo fechado quando a árvore muda
+  useEffect(() => {
+    const all = new Set<string>();
+    for (const root of tree) {
+      all.add(`root:${root.key}`);
+      for (const group of root.groups) {
+        all.add(`group:${group.key}`);
+      }
+    }
+    setCollapsed(all);
+  }, [tree]);
 
   const toggle = (key: string) => {
     setCollapsed((prev) => {
