@@ -206,6 +206,37 @@ export function useMoveProductToTier() {
   });
 }
 
+export function useToggleProductActive() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, active }: { id: string; active: boolean }) => {
+      const { error } = await supabase
+        .from("products")
+        .update({ status: active ? "active" : "planned" })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onMutate: async ({ id, active }) => {
+      await qc.cancelQueries({ queryKey: PRODUCTS_KEY });
+      const prev = qc.getQueryData<Product[]>(PRODUCTS_KEY);
+      qc.setQueryData<Product[]>(PRODUCTS_KEY, (old) =>
+        old?.map((p) =>
+          p.id === id ? { ...p, status: active ? "active" : "planned" } : p,
+        ),
+      );
+      return { prev };
+    },
+    onError: (e: any, _v, ctx) => {
+      if (ctx?.prev) qc.setQueryData(PRODUCTS_KEY, ctx.prev);
+      toast.error(e?.message ?? "Erro ao alterar status");
+    },
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: PRODUCTS_KEY });
+      qc.invalidateQueries({ queryKey: ["ladder"] });
+    },
+  });
+}
+
 export const STATUS_OPTIONS: { value: ProductStatus; label: string }[] = [
   { value: "active", label: "Ativo" },
   { value: "development", label: "Em desenvolvimento" },

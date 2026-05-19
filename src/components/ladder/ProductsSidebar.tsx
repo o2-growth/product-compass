@@ -2,11 +2,12 @@ import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Search, GripVertical } from "lucide-react";
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import { useProducts } from "@/hooks/useScale";
+import { useProducts, useToggleProductActive } from "@/hooks/useScale";
 import { STATUS_DOT, STATUS_LABEL, type Product } from "@/types/scale";
 import { formatTicket } from "@/hooks/useLadder";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 
 function DraggableSidebarItem({
@@ -18,17 +19,19 @@ function DraggableSidebarItem({
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({ id: `sidebar:${product.id}`, data: { type: "ladder-product", productId: product.id } });
+  const toggle = useToggleProductActive();
+  const isActive = product.status === "active";
 
   return (
     <div
       ref={setNodeRef}
       style={{
         transform: CSS.Translate.toString(transform),
-        opacity: isDragging ? 0.4 : 1,
+        opacity: isDragging ? 0.4 : isActive ? 1 : 0.55,
         zIndex: isDragging ? 1000 : "auto",
       }}
       className={cn(
-        "group/item relative flex w-full items-start gap-1 rounded-md px-1 py-1.5 text-left text-xs transition-colors hover:bg-accent",
+        "group/item relative flex w-full items-center gap-1 rounded-md px-1 py-1.5 text-left text-xs transition-colors hover:bg-accent",
       )}
     >
       <button
@@ -53,16 +56,34 @@ function DraggableSidebarItem({
               className={`h-1.5 w-1.5 shrink-0 rounded-full ${STATUS_DOT[product.status]}`}
               title={STATUS_LABEL[product.status]}
             />
-            <span className="truncate font-medium">{product.name}</span>
+            <span
+              className={cn(
+                "truncate font-medium",
+                !isActive && "line-through text-muted-foreground",
+              )}
+            >
+              {product.name}
+            </span>
           </div>
           <div className="mt-0.5 text-[10px] text-muted-foreground">
             {formatTicket(product.avg_ticket)}
           </div>
         </div>
       </button>
+      <Switch
+        checked={isActive}
+        onCheckedChange={(checked) =>
+          toggle.mutate({ id: product.id, active: checked })
+        }
+        className="ml-1 scale-75"
+        aria-label={isActive ? "Desativar produto" : "Ativar produto"}
+        title={isActive ? "Desativar produto" : "Ativar produto"}
+      />
     </div>
   );
 }
+
+
 
 
 interface Props {

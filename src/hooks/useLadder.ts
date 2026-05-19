@@ -61,6 +61,7 @@ export function useLadder(track: LadderTrack) {
         .from("products")
         .select("id, name, icon, avg_ticket, status, ladder_group, ladder_order")
         .eq("ladder_track", track)
+        .eq("status", "active")
         .not("ladder_group", "is", null)
         .order("ladder_order", { ascending: true });
       if (error) throw error;
