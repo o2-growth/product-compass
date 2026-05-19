@@ -1,14 +1,25 @@
 import { useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Search, GripVertical } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search, GripVertical, Trash2 } from "lucide-react";
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import { useProducts, useRenameProduct, useToggleProductActive } from "@/hooks/useScale";
+import { useProducts, useRenameProduct, useToggleProductActive, useDeleteProduct } from "@/hooks/useScale";
 import { STATUS_DOT, STATUS_LABEL, type Product } from "@/types/scale";
 import { formatTicket } from "@/hooks/useLadder";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { EditableText } from "@/components/ui/editable-text";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 
 function DraggableSidebarItem({
@@ -22,6 +33,7 @@ function DraggableSidebarItem({
     useDraggable({ id: `sidebar:${product.id}`, data: { type: "ladder-product", productId: product.id } });
   const toggle = useToggleProductActive();
   const rename = useRenameProduct();
+  const del = useDeleteProduct();
   const isActive = product.status === "active";
 
   return (
@@ -86,6 +98,38 @@ function DraggableSidebarItem({
         aria-label={isActive ? "Desativar produto" : "Ativar produto"}
         title={isActive ? "Desativar produto" : "Ativar produto"}
       />
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <button
+            type="button"
+            className="ml-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded text-muted-foreground opacity-0 transition-opacity hover:bg-red-500/10 hover:text-red-600 group-hover/item:opacity-100"
+            aria-label="Excluir produto"
+            title="Excluir produto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir produto?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Isso vai remover <span className="font-semibold">{product.name}</span> da
+              plataforma — incluindo todos os posicionamentos na Value Ladder e DIAP.
+              Essa ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 text-white hover:bg-red-700"
+              onClick={() => del.mutate(product.id)}
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
