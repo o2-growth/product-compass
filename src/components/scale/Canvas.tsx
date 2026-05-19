@@ -6,7 +6,8 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { Search, Plus } from "lucide-react";
+import { Search, Plus, LayoutGrid } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
