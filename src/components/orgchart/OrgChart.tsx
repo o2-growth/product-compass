@@ -1,11 +1,12 @@
 import { useMemo, useState } from "react";
-import { Link } from "@tanstack/react-router";
-import { Home, Layers, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useProducts, useTiers } from "@/hooks/useScale";
 import { ProductDrawer } from "@/components/scale/ProductDrawer";
 import type { Product } from "@/types/scale";
 import { OrgNode } from "./OrgNode";
+import { AppShell, FooterDot } from "@/components/shell/AppShell";
+import { cn } from "@/lib/utils";
 
 type GroupBy = "track" | "status" | "tier";
 type DrawerMode = "create" | "edit" | null;
