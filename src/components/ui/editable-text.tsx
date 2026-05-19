@@ -16,6 +16,8 @@ interface Props {
   ariaLabel?: string;
   /** Wrapper element — span by default. Use 'div' for block-level. */
   as?: "span" | "div";
+  /** When true, wrap text in up to 2 lines instead of truncating. */
+  clamp?: boolean;
 }
 
 /**
