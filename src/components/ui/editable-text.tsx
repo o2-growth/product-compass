@@ -109,14 +109,24 @@ export function EditableText({
 
   return (
     <Wrapper
-      className={cn("group/edit inline-flex items-center gap-1", className)}
+      className={cn(
+        "group/edit inline-flex max-w-full items-start gap-1 align-top",
+        className,
+      )}
       onDoubleClick={(e: React.MouseEvent) => {
         stop(e);
         setEditing(true);
       }}
       title="Duplo-clique para editar"
     >
-      <span className="min-w-0 truncate">{value}</span>
+      <span
+        className={cn(
+          "min-w-0",
+          clamp ? "line-clamp-2 break-words" : "truncate",
+        )}
+      >
+        {value}
+      </span>
       {showIcon && (
         <button
           type="button"
