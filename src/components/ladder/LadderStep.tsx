@@ -12,7 +12,7 @@ const PAD = 10;
 const MAX_PER_ROW = 3;
 
 // Vertical step delta — fits title + subtitle + yellow block (depends on rows) + margin
-const STEP_DELTA_Y = 220;
+const STEP_DELTA_Y = 300;
 // Horizontal gap between yellow blocks (no overlap, evita "um em cima do outro")
 const STEP_GAP_X = 32;
 
