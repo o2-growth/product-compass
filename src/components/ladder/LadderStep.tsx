@@ -43,18 +43,18 @@ export function LadderStep({ group, stepIndex, totalSteps, track }: Props) {
 
       {/* Yellow post-it */}
       <div
-        className="rounded-sm p-3 shadow-[0_6px_18px_-8px_rgba(0,0,0,0.25)]"
+        className="rounded-sm p-2.5 shadow-[0_6px_18px_-8px_rgba(0,0,0,0.25)]"
         style={{
           background: "#FEF3A0",
-          minWidth: group.products.length * 130 + 24,
+          minWidth: group.products.length * 108 + 20,
         }}
       >
         {/* Tickets row */}
-        <div className="mb-1.5 flex gap-2">
+        <div className="mb-1.5 flex gap-1.5">
           {group.products.map((p) => (
             <div
               key={`t-${p.id}`}
-              className="w-[120px] text-[11px] font-medium leading-tight text-neutral-700"
+              className="w-[100px] text-[10px] font-medium leading-tight text-neutral-700"
             >
               {formatTicket(p.avg_ticket)}
             </div>
@@ -62,16 +62,16 @@ export function LadderStep({ group, stepIndex, totalSteps, track }: Props) {
         </div>
 
         {/* Green product cards */}
-        <div className="flex gap-2">
+        <div className="flex gap-1.5">
           {group.products.map((p) => (
             <div
               key={p.id}
-              className="flex h-[110px] w-[120px] flex-col rounded-sm p-2 shadow-sm"
+              className="flex h-[96px] w-[100px] flex-col rounded-sm p-1.5 shadow-sm"
               style={{ background: "#A8E66C" }}
               title={p.name}
             >
-              <div className="text-lg leading-none">{p.icon || "📦"}</div>
-              <div className="mt-1 line-clamp-3 text-[11px] font-semibold leading-tight text-neutral-900">
+              <div className="text-base leading-none">{p.icon || "📦"}</div>
+              <div className="mt-1 line-clamp-3 text-[10px] font-semibold leading-tight text-neutral-900">
                 {p.name}
               </div>
             </div>
