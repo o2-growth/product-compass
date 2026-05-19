@@ -14,13 +14,13 @@ interface Props {
  * Positioned absolutely on the canvas so it climbs to the right & up.
  */
 export function LadderStep({ group, stepIndex, totalSteps, track }: Props) {
-  // Step layout: each step climbs to the right + up
-  // Horizontal: distribute steps with growing offset
-  const xStep = 100 / (totalSteps + 0.5); // % per step
-  const left = `${4 + stepIndex * xStep}%`;
-  // Vertical: bottom-up, lower index = lower height
-  const yStep = 100 / (totalSteps + 1);
-  const bottom = `${6 + stepIndex * yStep}%`;
+  // Step layout: each step climbs to the right + up.
+  // Use smaller increments so big groups don't overflow the canvas.
+  const xStep = 13; // % per step
+  const yStep = 14; // % per step
+  const left = `${3 + stepIndex * xStep}%`;
+  const bottom = `${4 + stepIndex * yStep}%`;
+  void totalSteps;
 
   const subtitle = TRACK_SUBTITLE[track]?.[group.name];
 
