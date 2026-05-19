@@ -21,6 +21,7 @@ function DraggableSidebarItem({
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({ id: `sidebar:${product.id}`, data: { type: "ladder-product", productId: product.id } });
   const toggle = useToggleProductActive();
+  const rename = useRenameProduct();
   const isActive = product.status === "active";
 
   return (
