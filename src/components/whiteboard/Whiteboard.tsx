@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
-  ArrowLeft,
+  Home,
   Hand,
   MousePointer2,
   Pencil,
@@ -308,7 +308,7 @@ export function Whiteboard() {
       <header className="flex items-center gap-3 border-b bg-background px-6 py-3">
         <Link to="/">
           <Button variant="ghost" size="sm" className="gap-1.5">
-            <ArrowLeft className="h-4 w-4" /> Kanban
+            <Home className="h-4 w-4" /> Home
           </Button>
         </Link>
         <div className="ml-2 flex h-8 w-8 items-center justify-center rounded-lg bg-status-active font-bold text-tier-header">

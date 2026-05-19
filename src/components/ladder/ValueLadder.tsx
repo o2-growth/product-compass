@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft, Network, Plus, Palette } from "lucide-react";
+import { LayoutGrid, Network, Plus, Palette } from "lucide-react";
 import {
   DndContext,
   type DragEndEvent,
@@ -84,7 +84,7 @@ export function ValueLadder() {
         <div className="flex items-center gap-2">
           <Link to="/">
             <Button variant="ghost" size="sm" className="gap-1.5">
-              <ArrowLeft className="h-4 w-4" /> Kanban
+              <LayoutGrid className="h-4 w-4" /> Home
             </Button>
           </Link>
           <div className="ml-2 flex h-8 w-8 items-center justify-center rounded-lg bg-status-active font-bold text-tier-header">
