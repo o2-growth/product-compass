@@ -47,6 +47,7 @@ function DiapCard({
         productId: product.product_id,
       },
     });
+  const rename = useRenameProduct();
 
   if (isLuxa) {
     return (
