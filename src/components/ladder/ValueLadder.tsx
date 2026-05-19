@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link } from "@tanstack/react-router";
-import { LayoutGrid, Network, Plus, Palette, GitBranch } from "lucide-react";
+import { Plus } from "lucide-react";
 import {
   DndContext,
   type DragEndEvent,
@@ -20,6 +19,8 @@ import {
 import { ProductDrawer } from "@/components/scale/ProductDrawer";
 import { LadderStep, getStepLefts, getStepWidth, STEP_DELTA_Y } from "./LadderStep";
 import { ProductsSidebar } from "./ProductsSidebar";
+import { AppShell, FooterDot } from "@/components/shell/AppShell";
+import { cn } from "@/lib/utils";
 
 type DrawerMode = "create" | "edit" | null;
 
