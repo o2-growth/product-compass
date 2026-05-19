@@ -14,6 +14,73 @@ export type Database = {
   }
   public: {
     Tables: {
+      product_diap_placements: {
+        Row: {
+          created_at: string | null
+          diap_column: string
+          id: string
+          order_index: number | null
+          product_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          diap_column: string
+          id?: string
+          order_index?: number | null
+          product_id: string
+        }
+        Update: {
+          created_at?: string | null
+          diap_column?: string
+          id?: string
+          order_index?: number | null
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_diap_placements_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_ladder_placements: {
+        Row: {
+          created_at: string | null
+          id: string
+          ladder_group: string
+          ladder_order: number | null
+          ladder_track: string
+          product_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          ladder_group: string
+          ladder_order?: number | null
+          ladder_track: string
+          product_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          ladder_group?: string
+          ladder_order?: number | null
+          ladder_track?: string
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_ladder_placements_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_tiers: {
         Row: {
           id: string
@@ -51,6 +118,7 @@ export type Database = {
         Row: {
           avg_ticket: number | null
           created_at: string | null
+          created_by: string | null
           description: string | null
           icon: string | null
           id: string
@@ -67,6 +135,7 @@ export type Database = {
         Insert: {
           avg_ticket?: number | null
           created_at?: string | null
+          created_by?: string | null
           description?: string | null
           icon?: string | null
           id?: string
@@ -83,6 +152,7 @@ export type Database = {
         Update: {
           avg_ticket?: number | null
           created_at?: string | null
+          created_by?: string | null
           description?: string | null
           icon?: string | null
           id?: string
