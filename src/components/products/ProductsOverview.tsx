@@ -322,6 +322,7 @@ const collisionDetection: CollisionDetection = (args) => {
 
 export function ProductsOverview() {
   const { data: products = [], isLoading } = useProducts();
+  const { data: tiers = [] } = useTiers();
   const reorder = useReorderProducts();
   const setStatus = useSetProductStatus();
 
@@ -330,6 +331,12 @@ export function ProductsOverview() {
     productId: string;
   } | null>(null);
   const [overBucket, setOverBucket] = useState<BucketKey | null>(null);
+
+  const [drawerMode, setDrawerMode] = useState<"create" | "edit" | null>(null);
+  const [editingId, setEditingId] = useState<string | undefined>(undefined);
+  const [createStatus, setCreateStatus] = useState<ProductStatus | undefined>(
+    undefined,
+  );
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -356,6 +363,29 @@ export function ProductsOverview() {
       activeDrag ? products.find((p) => p.id === activeDrag.productId) : null,
     [activeDrag, products],
   );
+
+  const editingProduct = useMemo(
+    () => (editingId ? products.find((p) => p.id === editingId) : undefined),
+    [editingId, products],
+  );
+
+  const openEdit = (id: string) => {
+    setEditingId(id);
+    setCreateStatus(undefined);
+    setDrawerMode("edit");
+  };
+
+  const openCreate = (status?: ProductStatus) => {
+    setEditingId(undefined);
+    setCreateStatus(status);
+    setDrawerMode("create");
+  };
+
+  const closeDrawer = () => {
+    setDrawerMode(null);
+    setEditingId(undefined);
+    setCreateStatus(undefined);
+  };
 
   function handleDragStart(event: DragStartEvent) {
     const parsed = parseId(String(event.active.id));
@@ -386,12 +416,10 @@ export function ProductsOverview() {
     const overParsed = parseId(String(over.id));
     if (!from || from.kind !== "card" || !overParsed) return;
 
-    // Determina bucket de destino e (se houver) produto-alvo na coluna
     const toBucket: BucketKey = overParsed.bucket;
     const toProductId =
       overParsed.kind === "card" ? overParsed.productId : null;
 
-    // Reorder dentro do mesmo bucket
     if (from.bucket === toBucket) {
       if (!toProductId || toProductId === from.productId) return;
       const list = grouped[from.bucket];
@@ -408,7 +436,6 @@ export function ProductsOverview() {
       return;
     }
 
-    // Cross-bucket: muda status
     const newStatus = BUCKET_TO_STATUS[toBucket];
     if (!newStatus) {
       toast.error(
@@ -417,8 +444,6 @@ export function ProductsOverview() {
       return;
     }
 
-    // Posição alvo: usa position_index do produto sobre o qual foi solto,
-    // ou max+1 da coluna alvo (no fim) se solto na própria coluna.
     const targetList = grouped[toBucket];
     let newPosition: number;
     if (toProductId) {
@@ -440,63 +465,85 @@ export function ProductsOverview() {
   }
 
   return (
-    <AppShell
-      eyebrow="Catálogo"
-      title="Produtos — Visão geral"
-      flushMain
-      footerLeft={
-        <>
-          <FooterDot color="emerald">{products.length} produtos</FooterDot>
-          <FooterDot color="gold">{grouped.new.length} novos (30d)</FooterDot>
-        </>
-      }
-      footerRight={
-        <span>Arraste pelo handle para reordenar ou mudar de fase</span>
-      }
-    >
-      <div className="h-full p-6 lg:p-8">
-        {isLoading ? (
-          <div className="flex h-64 items-center justify-center text-muted-foreground">
-            Carregando...
-          </div>
-        ) : (
-          <DndContext
-            sensors={sensors}
-            collisionDetection={collisionDetection}
-            onDragStart={handleDragStart}
-            onDragOver={handleDragOver}
-            onDragEnd={handleDragEnd}
-            onDragCancel={resetDrag}
+    <>
+      <AppShell
+        eyebrow="Catálogo"
+        title="Produtos — Visão geral"
+        flushMain
+        headerRight={
+          <Button
+            size="sm"
+            onClick={() => openCreate()}
+            className="gap-1.5"
           >
-            <div className="grid h-full min-h-0 grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4 lg:gap-6">
-              {BUCKETS.map((b) => (
-                <BucketColumn
-                  key={b.key}
-                  bucket={b.key}
-                  label={b.label}
-                  sub={b.sub}
-                  products={grouped[b.key]}
-                  isOverColumn={overBucket === b.key && activeDrag !== null}
-                  isDropAllowed={
-                    activeDrag?.bucket === b.key ||
-                    BUCKET_TO_STATUS[b.key] !== undefined
-                  }
-                />
-              ))}
+            <Plus className="h-4 w-4" />
+            Novo produto
+          </Button>
+        }
+        footerLeft={
+          <>
+            <FooterDot color="emerald">{products.length} produtos</FooterDot>
+            <FooterDot color="gold">{grouped.new.length} novos (30d)</FooterDot>
+          </>
+        }
+        footerRight={
+          <span>Clique no card para editar · arraste pelo handle</span>
+        }
+      >
+        <div className="h-full p-6 lg:p-8">
+          {isLoading ? (
+            <div className="flex h-64 items-center justify-center text-muted-foreground">
+              Carregando...
             </div>
-            <DragOverlay>
-              {activeProduct ? (
-                <div className="relative flex w-72 flex-col gap-3 rounded-2xl border border-white/30 bg-bg-elev-2 p-4 shadow-xl">
-                  <ProductCardInner
-                    product={activeProduct}
-                    showHandle={false}
+          ) : (
+            <DndContext
+              sensors={sensors}
+              collisionDetection={collisionDetection}
+              onDragStart={handleDragStart}
+              onDragOver={handleDragOver}
+              onDragEnd={handleDragEnd}
+              onDragCancel={resetDrag}
+            >
+              <div className="grid h-full min-h-0 grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4 lg:gap-6">
+                {BUCKETS.map((b) => (
+                  <BucketColumn
+                    key={b.key}
+                    bucket={b.key}
+                    label={b.label}
+                    sub={b.sub}
+                    products={grouped[b.key]}
+                    isOverColumn={overBucket === b.key && activeDrag !== null}
+                    isDropAllowed={
+                      activeDrag?.bucket === b.key ||
+                      BUCKET_TO_STATUS[b.key] !== undefined
+                    }
+                    onOpen={openEdit}
+                    onCreate={openCreate}
                   />
-                </div>
-              ) : null}
-            </DragOverlay>
-          </DndContext>
-        )}
-      </div>
-    </AppShell>
+                ))}
+              </div>
+              <DragOverlay>
+                {activeProduct ? (
+                  <div className="relative flex w-72 flex-col gap-3 rounded-2xl border border-white/30 bg-bg-elev-2 p-4 shadow-xl">
+                    <ProductCardInner
+                      product={activeProduct}
+                      showHandle={false}
+                    />
+                  </div>
+                ) : null}
+              </DragOverlay>
+            </DndContext>
+          )}
+        </div>
+      </AppShell>
+
+      <ProductDrawer
+        mode={drawerMode}
+        product={editingProduct}
+        defaultStatus={createStatus}
+        tiers={tiers}
+        onClose={closeDrawer}
+      />
+    </>
   );
 }
