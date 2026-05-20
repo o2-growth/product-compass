@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Plus } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Plus, ZoomIn, ZoomOut, Maximize2, RotateCcw } from "lucide-react";
 import {
   DndContext,
   type DragEndEvent,
@@ -21,6 +21,78 @@ import { LadderStep, getStepLefts, getStepWidth, STEP_DELTA_Y } from "./LadderSt
 import { ProductsSidebar } from "./ProductsSidebar";
 import { AppShell, FooterDot } from "@/components/shell/AppShell";
 import { cn } from "@/lib/utils";
+
+const ZOOM_MIN = 0.3;
+const ZOOM_MAX = 1.5;
+const ZOOM_STEP = 0.1;
+
+function ZoomToolbar({
+  scale,
+  onZoomIn,
+  onZoomOut,
+  onFit,
+  onReset,
+}: {
+  scale: number;
+  onZoomIn: () => void;
+  onZoomOut: () => void;
+  onFit: () => void;
+  onReset: () => void;
+}) {
+  const pct = Math.round(scale * 100);
+  return (
+    <div className="pointer-events-auto sticky top-3 z-40 ml-auto flex w-fit items-center gap-1 rounded-full border border-white/10 bg-black/60 p-1 shadow-lg backdrop-blur-md">
+      <button
+        type="button"
+        onClick={onZoomOut}
+        disabled={scale <= ZOOM_MIN + 0.001}
+        className="rounded-full p-1.5 text-white/70 transition hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+        title="Diminuir zoom"
+        aria-label="Diminuir zoom"
+      >
+        <ZoomOut className="h-3.5 w-3.5" />
+      </button>
+      <button
+        type="button"
+        onClick={onReset}
+        className="min-w-[44px] rounded-full px-2 py-1 font-mono text-[11px] text-white/80 transition hover:bg-white/10 hover:text-white"
+        title="Voltar para 100%"
+      >
+        {pct}%
+      </button>
+      <button
+        type="button"
+        onClick={onZoomIn}
+        disabled={scale >= ZOOM_MAX - 0.001}
+        className="rounded-full p-1.5 text-white/70 transition hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+        title="Aumentar zoom"
+        aria-label="Aumentar zoom"
+      >
+        <ZoomIn className="h-3.5 w-3.5" />
+      </button>
+      <div className="mx-1 h-4 w-px bg-white/10" />
+      <button
+        type="button"
+        onClick={onFit}
+        className="rounded-full p-1.5 text-white/70 transition hover:bg-white/10 hover:text-white"
+        title="Ajustar à tela"
+        aria-label="Ajustar à tela"
+      >
+        <Maximize2 className="h-3.5 w-3.5" />
+      </button>
+      <button
+        type="button"
+        onClick={onReset}
+        className="rounded-full p-1.5 text-white/70 transition hover:bg-white/10 hover:text-white"
+        title="Resetar para 100%"
+        aria-label="Resetar para 100%"
+      >
+        <RotateCcw className="h-3.5 w-3.5" />
+      </button>
+    </div>
+  );
+}
+
 
 type DrawerMode = "create" | "edit" | null;
 
