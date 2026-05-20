@@ -163,9 +163,11 @@ function ProductCardInner({
 function SortableProductCard({
   product,
   bucket,
+  onOpen,
 }: {
   product: Product;
   bucket: BucketKey;
+  onOpen: (id: string) => void;
 }) {
   const {
     attributes,
@@ -188,14 +190,27 @@ function SortableProductCard({
     <div
       ref={setNodeRef}
       style={style}
+      onClick={() => onOpen(product.id)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onOpen(product.id);
+        }
+      }}
       className={cn(
-        "group relative flex flex-col gap-3 rounded-2xl border border-white/10 bg-bg-elev-2 p-4 shadow-sm transition-colors hover:border-white/20",
+        "group relative flex cursor-pointer flex-col gap-3 rounded-2xl border border-white/10 bg-bg-elev-2 p-4 shadow-sm transition-colors hover:border-white/20",
         isDragging && "opacity-30",
       )}
     >
       <ProductCardInner
         product={product}
-        dragHandleProps={{ ...attributes, ...listeners } as any}
+        dragHandleProps={{
+          ...attributes,
+          ...listeners,
+          onClick: (e: React.MouseEvent) => e.stopPropagation(),
+        } as any}
       />
     </div>
   );
@@ -208,6 +223,8 @@ function BucketColumn({
   products,
   isOverColumn,
   isDropAllowed,
+  onOpen,
+  onCreate,
 }: {
   bucket: BucketKey;
   label: string;
@@ -215,6 +232,8 @@ function BucketColumn({
   products: Product[];
   isOverColumn: boolean;
   isDropAllowed: boolean;
+  onOpen: (id: string) => void;
+  onCreate?: (status: ProductStatus) => void;
 }) {
   const { setNodeRef } = useDroppable({
     id: colId(bucket),
@@ -222,6 +241,7 @@ function BucketColumn({
   });
 
   const itemIds = products.map((p) => cardId(bucket, p.id));
+  const createStatus = BUCKET_TO_STATUS[bucket];
 
   return (
     <div
@@ -244,9 +264,22 @@ function BucketColumn({
             {sub}
           </p>
         </div>
-        <span className="rounded-full bg-black/30 px-2.5 py-1 font-mono text-[11px] text-white/70">
-          {products.length}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="rounded-full bg-black/30 px-2.5 py-1 font-mono text-[11px] text-white/70">
+            {products.length}
+          </span>
+          {createStatus && onCreate && (
+            <button
+              type="button"
+              onClick={() => onCreate(createStatus)}
+              className="flex h-6 w-6 items-center justify-center rounded-full border border-white/10 text-white/60 transition hover:border-white/30 hover:text-white"
+              aria-label={`Adicionar produto em ${label}`}
+              title={`Adicionar em ${label}`}
+            >
+              <Plus className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
       </div>
       <div className="flex-1 space-y-3 overflow-y-auto pr-1">
         <SortableContext items={itemIds} strategy={verticalListSortingStrategy}>
@@ -265,7 +298,12 @@ function BucketColumn({
             </div>
           ) : (
             products.map((p) => (
-              <SortableProductCard key={p.id} product={p} bucket={bucket} />
+              <SortableProductCard
+                key={p.id}
+                product={p}
+                bucket={bucket}
+                onOpen={onOpen}
+              />
             ))
           )}
         </SortableContext>
