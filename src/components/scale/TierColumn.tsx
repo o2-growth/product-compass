@@ -42,7 +42,7 @@ export function TierColumn({
               {tier.name}
             </h3>
           </div>
-          <span className="inline-flex h-5 min-w-[1.5rem] items-center justify-center rounded-full border border-white/20 bg-white/10 px-1.5 text-[11px] font-semibold tabular-nums text-white/90">
+          <span className="inline-flex h-5 min-w-[1.5rem] items-center justify-center rounded-full border border-white/20 bg-bg-elev/10 px-1.5 text-[11px] font-semibold tabular-nums text-white/90">
             {products.length}
           </span>
         </div>

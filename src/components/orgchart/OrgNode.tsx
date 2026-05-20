@@ -94,7 +94,7 @@ export function OrgNode({
             className={[
               "ml-1 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded transition-colors",
               variant === "root"
-                ? "hover:bg-white/20"
+                ? "hover:bg-bg-elev/20"
                 : "hover:bg-muted",
             ].join(" ")}
             aria-label={collapsed ? "Expandir" : "Colapsar"}
@@ -132,7 +132,7 @@ export function OrgNode({
             className={[
               "ml-auto rounded-full px-2 py-0.5 text-[10px] font-semibold",
               variant === "root"
-                ? "bg-white/20 text-tier-header"
+                ? "bg-bg-elev/20 text-tier-header"
                 : "bg-muted text-muted-foreground",
             ].join(" ")}
           >

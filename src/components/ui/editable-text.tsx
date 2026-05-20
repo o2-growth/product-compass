@@ -96,7 +96,7 @@ export function EditableText({
         }
       },
       className: cn(
-        "w-full min-w-0 rounded border border-gold bg-white px-1 py-0.5 text-inherit font-inherit outline-none focus:ring-1 focus:ring-gold",
+        "w-full min-w-0 rounded border border-gold bg-bg-elev px-1 py-0.5 text-inherit font-inherit outline-none focus:ring-1 focus:ring-gold",
         inputClassName,
       ),
     };

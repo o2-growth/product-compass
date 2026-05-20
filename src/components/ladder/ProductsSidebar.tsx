@@ -45,7 +45,7 @@ function DraggableSidebarItem({
         zIndex: isDragging ? 1000 : "auto",
       }}
       className={cn(
-        "group/item relative flex w-full items-center gap-1 rounded-md px-1 py-1.5 text-left text-xs transition-colors hover:bg-accent",
+        "group/item relative flex w-full items-center gap-1 rounded-md px-1 py-1.5 text-left text-xs transition-colors hover:bg-white/5",
       )}
     >
       <button
@@ -169,17 +169,17 @@ export function ProductsSidebar({ onOpenProduct }: Props) {
 
   if (collapsed) {
     return (
-      <aside className="flex w-12 shrink-0 flex-col items-center border-r border-emerald-deep/10 bg-white py-3">
+      <aside className="flex w-12 shrink-0 flex-col items-center border-r border-white/10 bg-bg-elev py-3">
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8 text-emerald-deep"
+          className="h-8 w-8 text-white"
           onClick={() => setCollapsed(false)}
           aria-label="Expandir lista de produtos"
         >
           <ChevronRight className="h-4 w-4" />
         </Button>
-        <div className="mt-4 rotate-180 text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-deep/50 [writing-mode:vertical-rl]">
+        <div className="mt-4 rotate-180 text-[10px] font-bold uppercase tracking-[0.2em] text-white/50 [writing-mode:vertical-rl]">
           Inventário · {products.length}
         </div>
       </aside>
@@ -187,23 +187,23 @@ export function ProductsSidebar({ onOpenProduct }: Props) {
   }
 
   return (
-    <aside className="flex w-72 shrink-0 flex-col border-r border-emerald-deep/10 bg-white">
-      <div className="flex items-center justify-between border-b border-emerald-deep/10 px-4 py-3">
+    <aside className="flex w-72 shrink-0 flex-col border-r border-white/10 bg-bg-elev">
+      <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
         <div>
-          <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-deep/50">
+          <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/50">
             Inventário
           </div>
-          <div className="font-display text-sm font-semibold text-emerald-deep">
+          <div className="font-display text-sm font-semibold text-white">
             {products.length} produtos
           </div>
-          <div className="mt-0.5 text-[10px] text-emerald-deep/50">
+          <div className="mt-0.5 text-[10px] text-white/50">
             Ticket total {formatTicket(totalTicket)}
           </div>
         </div>
         <Button
           variant="ghost"
           size="icon"
-          className="h-7 w-7 text-emerald-deep"
+          className="h-7 w-7 text-white"
           onClick={() => setCollapsed(true)}
           aria-label="Recolher"
         >
@@ -211,14 +211,14 @@ export function ProductsSidebar({ onOpenProduct }: Props) {
         </Button>
       </div>
 
-      <div className="border-b border-emerald-deep/10 px-4 py-3">
+      <div className="border-b border-white/10 px-4 py-3">
         <div className="relative">
-          <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-emerald-deep/40" />
+          <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/40" />
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Buscar produto..."
-            className="h-9 rounded-full border-emerald-deep/10 bg-cream/50 pl-8 text-xs"
+            className="h-9 rounded-full border-white/10 bg-bg-elev/5 pl-8 text-xs"
           />
         </div>
       </div>

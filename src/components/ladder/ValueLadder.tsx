@@ -131,7 +131,7 @@ export function ValueLadder() {
           <>
             <Button
               size="sm"
-              className="gap-1.5 rounded-full bg-gold px-4 text-emerald-deep hover:bg-gold/90"
+              className="gap-1.5 rounded-full bg-gold px-4 text-white hover:bg-gold/90"
               onClick={() => openCreate(undefined)}
             >
               <Plus className="h-4 w-4" /> Adicionar produto
@@ -144,7 +144,7 @@ export function ValueLadder() {
                   className={cn(
                     "rounded-full px-4 py-1 text-xs font-bold tracking-wide transition-colors",
                     track === t
-                      ? "bg-gold text-emerald-deep shadow"
+                      ? "bg-gold text-white shadow"
                       : "text-white/60 hover:text-white",
                   )}
                 >
@@ -180,13 +180,13 @@ export function ValueLadder() {
                 backgroundSize: "40px 40px",
               }}
             >
-              <h2 className="absolute left-1/2 top-6 -translate-x-1/2 font-display text-2xl font-bold text-emerald-deep">
+              <h2 className="absolute left-1/2 top-6 -translate-x-1/2 font-display text-2xl font-bold text-white">
                 {TRACK_TITLE[track]}
               </h2>
 
               {/* Y axis */}
               <div className="absolute bottom-12 left-16 top-20">
-                <div className="relative h-full w-px bg-emerald-deep/60">
+                <div className="relative h-full w-px bg-bg-elev/60">
                   <div
                     className="absolute -left-[5px] -top-1 h-0 w-0"
                     style={{
@@ -196,7 +196,7 @@ export function ValueLadder() {
                       color: "var(--emerald-deep)",
                     }}
                   />
-                  <span className="absolute -top-7 -left-3 text-xs font-bold tracking-[0.18em] text-emerald-deep">
+                  <span className="absolute -top-7 -left-3 text-xs font-bold tracking-[0.18em] text-white">
                     PREÇO
                   </span>
                 </div>
@@ -204,7 +204,7 @@ export function ValueLadder() {
 
               {/* X axis */}
               <div className="absolute bottom-12 left-16 right-12">
-                <div className="relative h-px w-full bg-emerald-deep/60">
+                <div className="relative h-px w-full bg-bg-elev/60">
                   <div
                     className="absolute -right-1 -top-[5px] h-0 w-0"
                     style={{
@@ -214,7 +214,7 @@ export function ValueLadder() {
                       color: "var(--emerald-deep)",
                     }}
                   />
-                  <span className="absolute -bottom-5 right-0 text-xs font-bold tracking-[0.18em] text-emerald-deep">
+                  <span className="absolute -bottom-5 right-0 text-xs font-bold tracking-[0.18em] text-white">
                     VALOR
                   </span>
                 </div>
