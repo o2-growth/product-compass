@@ -6,8 +6,6 @@ import logoWhite from "@/assets/o2/logo-white.png";
 const NAV_ITEMS = [
   { to: "/", label: "Value Ladder" },
   { to: "/diap", label: "DIAP" },
-  { to: "/orgchart", label: "Organograma" },
-  { to: "/whiteboard", label: "Whiteboard" },
 ] as const;
 
 interface AppShellProps {
