@@ -15,6 +15,7 @@ import {
 import type { ProductFormData, Tier } from "@/types/scale";
 import { STATUS_OPTIONS } from "@/hooks/useScale";
 import { GROUP_ORDER, type LadderTrack } from "@/hooks/useLadder";
+import { DIAP_COLUMNS } from "@/hooks/useDiap";
 
 const EMPTY: ProductFormData = {
   name: "",
@@ -29,6 +30,7 @@ const EMPTY: ProductFormData = {
   ladder_group: "",
   ladder_order: null,
   created_by: "",
+  diap_columns: [],
 };
 
 interface Props {
@@ -81,6 +83,15 @@ export function ProductForm({
       form.tier_ids.includes(id)
         ? form.tier_ids.filter((x) => x !== id)
         : [...form.tier_ids, id],
+    );
+  };
+
+  const toggleDiapColumn = (col: string) => {
+    update(
+      "diap_columns",
+      form.diap_columns.includes(col)
+        ? form.diap_columns.filter((x) => x !== col)
+        : [...form.diap_columns, col],
     );
   };
 
@@ -228,7 +239,6 @@ export function ProductForm({
               onValueChange={(v) => {
                 const next = v === "none" ? null : (v as LadderTrack);
                 update("ladder_track", next);
-                // Limpa grupo se não pertence à nova trilha
                 if (next && form.ladder_group && !GROUP_ORDER[next].includes(form.ladder_group)) {
                   update("ladder_group", "");
                 }
@@ -275,6 +285,26 @@ export function ProductForm({
               }
               disabled={!form.ladder_track}
             />
+          </div>
+        </div>
+
+        <div className="rounded-lg border bg-muted/30 p-3">
+          <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            DIAP
+          </Label>
+          <div className="mt-2 grid grid-cols-3 gap-2">
+            {DIAP_COLUMNS.map((col) => (
+              <label
+                key={col}
+                className="flex cursor-pointer items-center gap-2 rounded-md border px-2 py-1.5 text-sm hover:bg-muted/50"
+              >
+                <Checkbox
+                  checked={form.diap_columns.includes(col)}
+                  onCheckedChange={() => toggleDiapColumn(col)}
+                />
+                <span className="truncate font-mono font-semibold">{col}</span>
+              </label>
+            ))}
           </div>
         </div>
 

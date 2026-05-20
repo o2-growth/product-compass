@@ -1,15 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ProductsOverview } from "@/components/products/ProductsOverview";
+import { ProductsTable } from "@/components/products/ProductsTable";
 
 export const Route = createFileRoute("/products")({
-  component: ProductsOverview,
+  component: ProductsTable,
   head: () => ({
     meta: [
       { title: "Produtos — Product Compass" },
       {
         name: "description",
-        content:
-          "Visão geral dos produtos O2 agrupados por status: ativos, em planejamento, novos e futuros.",
+        content: "Tabela completa do portfólio de produtos O2 Inc.",
       },
     ],
   }),

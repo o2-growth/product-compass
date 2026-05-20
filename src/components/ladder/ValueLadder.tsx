@@ -15,7 +15,9 @@ import {
   useAddProductPlacement,
   useMoveProductPlacement,
   useRemoveProductPlacement,
+  useReorderProducts,
 } from "@/hooks/useScale";
+import { arrayMove } from "@dnd-kit/sortable";
 import { ProductDrawer } from "@/components/scale/ProductDrawer";
 import { LadderStep, getStepLefts, getStepWidth, STEP_DELTA_Y } from "./LadderStep";
 import { ProductsSidebar } from "./ProductsSidebar";
@@ -180,6 +182,7 @@ export function ValueLadder() {
   const addPlacement = useAddProductPlacement();
   const movePlacement = useMoveProductPlacement();
   const removePlacement = useRemoveProductPlacement();
+  const reorderProducts = useReorderProducts();
 
   const [drawerMode, setDrawerMode] = useState<DrawerMode>(null);
   const [activeId, setActiveId] = useState<string | undefined>();
@@ -215,6 +218,33 @@ export function ValueLadder() {
   const handleDragEnd = (e: DragEndEvent) => {
     const { active, over } = e;
     if (!over) return;
+
+    // Sidebar sort: ambos os IDs começam com "sidebar:"
+    const activeIdStr = String(active.id);
+    const overIdStr = String(over.id);
+    if (activeIdStr.startsWith("sidebar:") && overIdStr.startsWith("sidebar:")) {
+      const containerId = (active.data.current as any)?.sortable?.containerId as string | undefined;
+      const trackFilter =
+        containerId === "sidebar-b2b" ? "b2b" :
+        containerId === "sidebar-b2c" ? "b2c" : null;
+
+      const sectionProducts = [...products]
+        .filter((p) =>
+          trackFilter
+            ? p.ladder_placements?.some((lp) => lp.ladder_track === trackFilter) || p.ladder_track === trackFilter
+            : !p.ladder_placements?.length && !p.ladder_track
+        )
+        .sort((a, b) => a.position_index - b.position_index);
+
+      const activeIndex = sectionProducts.findIndex((p) => `sidebar:${p.id}` === activeIdStr);
+      const overIndex = sectionProducts.findIndex((p) => `sidebar:${p.id}` === overIdStr);
+      if (activeIndex !== -1 && overIndex !== -1 && activeIndex !== overIndex) {
+        const reordered = arrayMove(sectionProducts, activeIndex, overIndex);
+        reorderProducts.mutate(reordered.map((p, i) => ({ id: p.id, position_index: i })));
+      }
+      return;
+    }
+
     const overData = over.data.current as
       | { type: string; group: string; track: LadderTrack }
       | undefined;

@@ -52,6 +52,7 @@ export interface ProductFormData {
   ladder_group: string;
   ladder_order: number | null;
   created_by: string;
+  diap_columns: string[];
 }
 
 export const STATUS_LABEL: Record<ProductStatus, string> = {

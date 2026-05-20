@@ -1,7 +1,11 @@
 import { useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Search, GripVertical, Trash2 } from "lucide-react";
-import { useDraggable } from "@dnd-kit/core";
+import { ChevronLeft, ChevronRight, Search, Trash2, GripVertical } from "lucide-react";
 import { CSS } from "@dnd-kit/utilities";
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import { useProducts, useRenameProduct, useToggleProductActive, useDeleteProduct } from "@/hooks/useScale";
 import { STATUS_DOT, STATUS_LABEL, type Product } from "@/types/scale";
 import { formatTicket } from "@/hooks/useLadder";
@@ -22,15 +26,25 @@ import {
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 
-function DraggableSidebarItem({
+function SortableSidebarItem({
   product,
   onOpen,
 }: {
   product: Product;
   onOpen?: (id: string) => void;
 }) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } =
-    useDraggable({ id: `sidebar:${product.id}`, data: { type: "ladder-product", productId: product.id } });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: `sidebar:${product.id}`,
+    data: { type: "ladder-product", productId: product.id },
+  });
+
   const toggle = useToggleProductActive();
   const rename = useRenameProduct();
   const del = useDeleteProduct();
@@ -40,24 +54,29 @@ function DraggableSidebarItem({
     <div
       ref={setNodeRef}
       style={{
-        transform: CSS.Translate.toString(transform),
+        transform: CSS.Transform.toString(transform),
+        transition,
         opacity: isDragging ? 0.4 : isActive ? 1 : 0.55,
         zIndex: isDragging ? 1000 : "auto",
       }}
       className={cn(
         "group/item relative flex w-full items-center gap-1 rounded-md px-1 py-1.5 text-left text-xs transition-colors hover:bg-white/5",
+        isDragging && "shadow-lg ring-1 ring-white/20",
       )}
+      {...attributes}
     >
+      {/* Handle de drag — serve pra arrastar pra o canvas E pra reordenar */}
       <button
         type="button"
         {...listeners}
-        {...attributes}
         className="flex h-5 w-4 shrink-0 cursor-grab items-center justify-center rounded text-muted-foreground opacity-0 transition-opacity hover:text-foreground active:cursor-grabbing group-hover/item:opacity-100"
-        title="Arrastar para a escada"
+        title="Arrastar"
         aria-label="Arrastar produto"
       >
         <GripVertical className="h-3 w-3" />
       </button>
+
+      {/* Área clicável para abrir o drawer */}
       <div
         role="button"
         tabIndex={0}
@@ -96,6 +115,7 @@ function DraggableSidebarItem({
           </div>
         </div>
       </div>
+
       <Switch
         checked={isActive}
         onCheckedChange={(checked) =>
@@ -112,7 +132,6 @@ function DraggableSidebarItem({
             className="ml-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded text-muted-foreground opacity-0 transition-opacity hover:bg-red-500/10 hover:text-red-600 group-hover/item:opacity-100"
             aria-label="Excluir produto"
             title="Excluir produto"
-            onClick={(e) => e.stopPropagation()}
           >
             <Trash2 className="h-3.5 w-3.5" />
           </button>
@@ -141,8 +160,28 @@ function DraggableSidebarItem({
   );
 }
 
-
-
+function SectionList({
+  products,
+  sectionId,
+  onOpen,
+}: {
+  products: Product[];
+  sectionId: string;
+  onOpen?: (id: string) => void;
+}) {
+  const ids = products.map((p) => `sidebar:${p.id}`);
+  return (
+    <SortableContext id={sectionId} items={ids} strategy={verticalListSortingStrategy}>
+      <ul className="space-y-0.5">
+        {products.map((p) => (
+          <li key={p.id}>
+            <SortableSidebarItem product={p} onOpen={onOpen} />
+          </li>
+        ))}
+      </ul>
+    </SortableContext>
+  );
+}
 
 interface Props {
   onOpenProduct?: (id: string) => void;
@@ -154,12 +193,25 @@ export function ProductsSidebar({ onOpenProduct }: Props) {
   const [collapsed, setCollapsed] = useState(false);
   const [query, setQuery] = useState("");
 
-  const filtered = useMemo(() => {
+  const { b2b, b2c, unassigned } = useMemo(() => {
     const q = query.trim().toLowerCase();
     const list = q
       ? products.filter((p) => p.name.toLowerCase().includes(q))
       : products;
-    return [...list].sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
+    const sorted = [...list].sort((a, b) => a.position_index - b.position_index);
+
+    const isB2B = (p: Product) =>
+      p.ladder_placements?.some((lp) => lp.ladder_track === "b2b") ||
+      p.ladder_track === "b2b";
+    const isB2C = (p: Product) =>
+      p.ladder_placements?.some((lp) => lp.ladder_track === "b2c") ||
+      p.ladder_track === "b2c";
+
+    return {
+      b2b: sorted.filter(isB2B),
+      b2c: sorted.filter(isB2C),
+      unassigned: sorted.filter((p) => !isB2B(p) && !isB2C(p)),
+    };
   }, [products, query]);
 
   const totalTicket = useMemo(
@@ -226,18 +278,49 @@ export function ProductsSidebar({ onOpenProduct }: Props) {
       <div className="flex-1 overflow-y-auto px-2 py-3">
         {isLoading ? (
           <div className="px-2 text-xs text-muted-foreground">Carregando...</div>
-        ) : filtered.length === 0 ? (
+        ) : products.length === 0 ? (
           <div className="px-2 text-xs text-muted-foreground">
             Nenhum produto encontrado.
           </div>
         ) : (
-          <ul className="space-y-0.5">
-            {filtered.map((p) => (
-              <li key={p.id}>
-                <DraggableSidebarItem product={p} onOpen={onOpenProduct} />
-              </li>
-            ))}
-          </ul>
+          <div className="space-y-4">
+            {b2b.length > 0 && (
+              <div>
+                <div className="mb-1.5 px-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white/40">
+                  B2B · {b2b.length}
+                </div>
+                <SectionList
+                  products={b2b}
+                  sectionId="sidebar-b2b"
+                  onOpen={onOpenProduct}
+                />
+              </div>
+            )}
+            {b2c.length > 0 && (
+              <div>
+                <div className="mb-1.5 px-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white/40">
+                  B2C · {b2c.length}
+                </div>
+                <SectionList
+                  products={b2c}
+                  sectionId="sidebar-b2c"
+                  onOpen={onOpenProduct}
+                />
+              </div>
+            )}
+            {unassigned.length > 0 && (
+              <div>
+                <div className="mb-1.5 px-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white/40">
+                  Sem trilha · {unassigned.length}
+                </div>
+                <SectionList
+                  products={unassigned}
+                  sectionId="sidebar-other"
+                  onOpen={onOpenProduct}
+                />
+              </div>
+            )}
+          </div>
         )}
       </div>
     </aside>

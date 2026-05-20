@@ -7,8 +7,9 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
+import { arrayMove } from "@dnd-kit/sortable";
 import { Button } from "@/components/ui/button";
-import { useProducts, useTiers } from "@/hooks/useScale";
+import { useProducts, useTiers, useReorderProducts } from "@/hooks/useScale";
 import {
   DIAP_COLUMNS,
   useAddDiapPlacement,
@@ -31,6 +32,7 @@ export function Diap() {
   const add = useAddDiapPlacement();
   const move = useMoveDiapPlacement();
   const remove = useRemoveDiapPlacement();
+  const reorderProducts = useReorderProducts();
 
   const [drawerMode, setDrawerMode] = useState<DrawerMode>(null);
   const [activeId, setActiveId] = useState<string | undefined>();
@@ -65,12 +67,39 @@ export function Diap() {
   const handleDragEnd = (e: DragEndEvent) => {
     const { active, over } = e;
     if (!over) return;
+
+    // Sidebar sort
+    const activeIdStr = String(active.id);
+    const overIdStr = String(over.id);
+    if (activeIdStr.startsWith("sidebar:") && overIdStr.startsWith("sidebar:")) {
+      const containerId = (active.data.current as any)?.sortable?.containerId as string | undefined;
+      const trackFilter =
+        containerId === "sidebar-b2b" ? "b2b" :
+        containerId === "sidebar-b2c" ? "b2c" : null;
+
+      const sectionProducts = [...products]
+        .filter((p) =>
+          trackFilter
+            ? p.ladder_placements?.some((lp) => lp.ladder_track === trackFilter) || p.ladder_track === trackFilter
+            : !p.ladder_placements?.length && !p.ladder_track
+        )
+        .sort((a, b) => a.position_index - b.position_index);
+
+      const activeIndex = sectionProducts.findIndex((p) => `sidebar:${p.id}` === activeIdStr);
+      const overIndex = sectionProducts.findIndex((p) => `sidebar:${p.id}` === overIdStr);
+      if (activeIndex !== -1 && overIndex !== -1 && activeIndex !== overIndex) {
+        const reordered = arrayMove(sectionProducts, activeIndex, overIndex);
+        reorderProducts.mutate(reordered.map((p, i) => ({ id: p.id, position_index: i })));
+      }
+      return;
+    }
+
     const overData = over.data.current as
       | { type: string; column: DiapColumn }
       | undefined;
     if (!overData || overData.type !== "diap-column") return;
 
-    const rawId = String(active.id);
+    const rawId = activeIdStr;
 
     if (rawId.startsWith("diap-placement:")) {
       const placementId = rawId.slice("diap-placement:".length);
