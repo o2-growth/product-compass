@@ -192,6 +192,25 @@ export function ValueLadder() {
     [groups],
   );
 
+  // ====== Zoom / Fit-to-screen ======
+  const [scale, setScale] = useState(1);
+  const [hasAutoFit, setHasAutoFit] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  const clampScale = (s: number) =>
+    Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, s));
+
+  const computeFitScale = (innerW: number, innerH: number) => {
+    const scroller = wrapperRef.current?.parentElement; // <main> com overflow-auto
+    if (!scroller) return 1;
+    const padX = 48;
+    const padY = 48;
+    const sx = (scroller.clientWidth - padX) / innerW;
+    const sy = (scroller.clientHeight - padY) / innerH;
+    return clampScale(Math.min(sx, sy));
+  };
+
+
   return (
     <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
       <AppShell
