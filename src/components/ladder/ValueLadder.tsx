@@ -260,16 +260,22 @@ export function ValueLadder() {
             ? lefts[lefts.length - 1] + getStepWidth(last.products.length) + 80
             : 1700;
           const totalHeight = Math.max(800, groups.length * STEP_DELTA_Y + 260);
+          const innerW = Math.max(totalWidth + 200, 1700);
+          const innerH = totalHeight;
+
           return (
-            <div
-              className="relative mx-auto"
-              style={{
-                width: Math.max(totalWidth + 200, 1700),
-                height: totalHeight,
-                backgroundImage:
-                  "linear-gradient(to right, oklch(0.32 0.07 165 / 0.05) 1px, transparent 1px), linear-gradient(to bottom, oklch(0.32 0.07 165 / 0.05) 1px, transparent 1px)",
-                backgroundSize: "40px 40px",
-              }}
+            <ValueLadderViewport
+              innerW={innerW}
+              innerH={innerH}
+              scale={scale}
+              setScale={setScale}
+              hasAutoFit={hasAutoFit}
+              setHasAutoFit={setHasAutoFit}
+              wrapperRef={wrapperRef}
+              isLoading={isLoading}
+              groupsCount={groups.length}
+              computeFitScale={computeFitScale}
+              clampScale={clampScale}
             >
               <h2 className="absolute left-1/2 top-6 -translate-x-1/2 font-display text-2xl font-bold text-white">
                 {TRACK_TITLE[track]}
@@ -339,10 +345,11 @@ export function ValueLadder() {
                   </div>
                 )}
               </div>
-            </div>
+            </ValueLadderViewport>
           );
         })()}
       </AppShell>
+
 
       <ProductDrawer
         mode={drawerMode}
