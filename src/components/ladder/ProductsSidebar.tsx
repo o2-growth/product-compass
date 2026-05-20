@@ -45,7 +45,7 @@ function DraggableSidebarItem({
         zIndex: isDragging ? 1000 : "auto",
       }}
       className={cn(
-        "group/item relative flex w-full items-center gap-1 rounded-md px-1 py-1.5 text-left text-xs transition-colors hover:bg-accent",
+        "group/item relative flex w-full items-center gap-1 rounded-md px-1 py-1.5 text-left text-xs transition-colors hover:bg-white/5",
       )}
     >
       <button
