@@ -114,7 +114,7 @@ function ValueLadderViewport({
   setScale: (s: number) => void;
   hasAutoFit: boolean;
   setHasAutoFit: (b: boolean) => void;
-  wrapperRef: React.RefObject<HTMLDivElement>;
+  wrapperRef: React.RefObject<HTMLDivElement | null>;
   isLoading: boolean;
   groupsCount: number;
   computeFitScale: (w: number, h: number) => number;
