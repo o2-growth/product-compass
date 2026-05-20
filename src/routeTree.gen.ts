@@ -9,22 +9,10 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as WhiteboardRouteImport } from './routes/whiteboard'
-import { Route as OrgchartRouteImport } from './routes/orgchart'
 import { Route as LadderRouteImport } from './routes/ladder'
 import { Route as DiapRouteImport } from './routes/diap'
 import { Route as IndexRouteImport } from './routes/index'
 
-const WhiteboardRoute = WhiteboardRouteImport.update({
-  id: '/whiteboard',
-  path: '/whiteboard',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OrgchartRoute = OrgchartRouteImport.update({
-  id: '/orgchart',
-  path: '/orgchart',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const LadderRoute = LadderRouteImport.update({
   id: '/ladder',
   path: '/ladder',
@@ -45,56 +33,34 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/diap': typeof DiapRoute
   '/ladder': typeof LadderRoute
-  '/orgchart': typeof OrgchartRoute
-  '/whiteboard': typeof WhiteboardRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/diap': typeof DiapRoute
   '/ladder': typeof LadderRoute
-  '/orgchart': typeof OrgchartRoute
-  '/whiteboard': typeof WhiteboardRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/diap': typeof DiapRoute
   '/ladder': typeof LadderRoute
-  '/orgchart': typeof OrgchartRoute
-  '/whiteboard': typeof WhiteboardRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/diap' | '/ladder' | '/orgchart' | '/whiteboard'
+  fullPaths: '/' | '/diap' | '/ladder'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/diap' | '/ladder' | '/orgchart' | '/whiteboard'
-  id: '__root__' | '/' | '/diap' | '/ladder' | '/orgchart' | '/whiteboard'
+  to: '/' | '/diap' | '/ladder'
+  id: '__root__' | '/' | '/diap' | '/ladder'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DiapRoute: typeof DiapRoute
   LadderRoute: typeof LadderRoute
-  OrgchartRoute: typeof OrgchartRoute
-  WhiteboardRoute: typeof WhiteboardRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/whiteboard': {
-      id: '/whiteboard'
-      path: '/whiteboard'
-      fullPath: '/whiteboard'
-      preLoaderRoute: typeof WhiteboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/orgchart': {
-      id: '/orgchart'
-      path: '/orgchart'
-      fullPath: '/orgchart'
-      preLoaderRoute: typeof OrgchartRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/ladder': {
       id: '/ladder'
       path: '/ladder'
@@ -123,19 +89,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DiapRoute: DiapRoute,
   LadderRoute: LadderRoute,
-  OrgchartRoute: OrgchartRoute,
-  WhiteboardRoute: WhiteboardRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
