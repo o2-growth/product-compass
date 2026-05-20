@@ -463,3 +463,45 @@ export const STATUS_OPTIONS: { value: ProductStatus; label: string }[] = [
   { value: "development", label: "Em desenvolvimento" },
   { value: "planned", label: "Planejado" },
 ];
+
+/**
+ * Reordena produtos atribuindo novos position_index. Recebe lista
+ * { id, position_index } e atualiza só esses produtos.
+ * Optimistic update na cache pra UI não piscar.
+ */
+export function useReorderProducts() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (updates: { id: string; position_index: number }[]) => {
+      await Promise.all(
+        updates.map((u) =>
+          supabase
+            .from("products")
+            .update({ position_index: u.position_index })
+            .eq("id", u.id)
+            .then(({ error }) => {
+              if (error) throw error;
+            }),
+        ),
+      );
+    },
+    onMutate: async (updates) => {
+      await qc.cancelQueries({ queryKey: PRODUCTS_KEY });
+      const prev = qc.getQueryData<Product[]>(PRODUCTS_KEY);
+      const map = new Map(updates.map((u) => [u.id, u.position_index]));
+      qc.setQueryData<Product[]>(PRODUCTS_KEY, (old) =>
+        old?.map((p) =>
+          map.has(p.id) ? { ...p, position_index: map.get(p.id)! } : p,
+        ),
+      );
+      return { prev };
+    },
+    onError: (e: any, _v, ctx) => {
+      if (ctx?.prev) qc.setQueryData(PRODUCTS_KEY, ctx.prev);
+      toast.error(e?.message ?? "Erro ao reordenar");
+    },
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: PRODUCTS_KEY });
+    },
+  });
+}
