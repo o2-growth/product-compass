@@ -94,7 +94,83 @@ function ZoomToolbar({
 }
 
 
+function ValueLadderViewport({
+  innerW,
+  innerH,
+  scale,
+  setScale,
+  hasAutoFit,
+  setHasAutoFit,
+  wrapperRef,
+  isLoading,
+  groupsCount,
+  computeFitScale,
+  clampScale,
+  children,
+}: {
+  innerW: number;
+  innerH: number;
+  scale: number;
+  setScale: (s: number) => void;
+  hasAutoFit: boolean;
+  setHasAutoFit: (b: boolean) => void;
+  wrapperRef: React.RefObject<HTMLDivElement>;
+  isLoading: boolean;
+  groupsCount: number;
+  computeFitScale: (w: number, h: number) => number;
+  clampScale: (s: number) => number;
+  children: React.ReactNode;
+}) {
+  // Auto-fit na primeira renderização com dados
+  useEffect(() => {
+    if (hasAutoFit || isLoading || groupsCount === 0) return;
+    // próximo tick pra garantir que o parent (main) já mediu
+    const id = requestAnimationFrame(() => {
+      const fit = computeFitScale(innerW, innerH);
+      setScale(fit);
+      setHasAutoFit(true);
+    });
+    return () => cancelAnimationFrame(id);
+  }, [hasAutoFit, isLoading, groupsCount, innerW, innerH, computeFitScale, setScale, setHasAutoFit]);
+
+  return (
+    <div ref={wrapperRef} className="relative w-full">
+      <ZoomToolbar
+        scale={scale}
+        onZoomIn={() => setScale(clampScale(scale + ZOOM_STEP))}
+        onZoomOut={() => setScale(clampScale(scale - ZOOM_STEP))}
+        onFit={() => setScale(computeFitScale(innerW, innerH))}
+        onReset={() => setScale(1)}
+      />
+      <div
+        // wrapper que toma o espaço escalado pra que o scroll do <main> seja correto
+        style={{
+          width: innerW * scale,
+          height: innerH * scale,
+          margin: "0 auto",
+        }}
+      >
+        <div
+          className="relative"
+          style={{
+            width: innerW,
+            height: innerH,
+            transform: `scale(${scale})`,
+            transformOrigin: "top left",
+            backgroundImage:
+              "linear-gradient(to right, oklch(0.32 0.07 165 / 0.05) 1px, transparent 1px), linear-gradient(to bottom, oklch(0.32 0.07 165 / 0.05) 1px, transparent 1px)",
+            backgroundSize: "40px 40px",
+          }}
+        >
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 type DrawerMode = "create" | "edit" | null;
+
 
 export function ValueLadder() {
   const [track, setTrack] = useState<LadderTrack>("b2b");
