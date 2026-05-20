@@ -470,16 +470,6 @@ export function ProductsOverview() {
         eyebrow="Catálogo"
         title="Produtos — Visão geral"
         flushMain
-        headerRight={
-          <Button
-            size="sm"
-            onClick={() => openCreate()}
-            className="gap-1.5"
-          >
-            <Plus className="h-4 w-4" />
-            Novo produto
-          </Button>
-        }
         footerLeft={
           <>
             <FooterDot color="emerald">{products.length} produtos</FooterDot>
@@ -490,7 +480,13 @@ export function ProductsOverview() {
           <span>Clique no card para editar · arraste pelo handle</span>
         }
       >
-        <div className="h-full p-6 lg:p-8">
+        <div className="flex h-full flex-col p-6 lg:p-8">
+          <div className="mb-5 flex items-center justify-end">
+            <Button size="sm" onClick={() => openCreate()} className="gap-1.5">
+              <Plus className="h-4 w-4" />
+              Novo produto
+            </Button>
+          </div>
           {isLoading ? (
             <div className="flex h-64 items-center justify-center text-muted-foreground">
               Carregando...
@@ -504,7 +500,7 @@ export function ProductsOverview() {
               onDragEnd={handleDragEnd}
               onDragCancel={resetDrag}
             >
-              <div className="grid h-full min-h-0 grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4 lg:gap-6">
+              <div className="grid min-h-0 flex-1 grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4 lg:gap-6">
                 {BUCKETS.map((b) => (
                   <BucketColumn
                     key={b.key}
