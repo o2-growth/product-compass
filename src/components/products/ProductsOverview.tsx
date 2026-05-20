@@ -3,6 +3,7 @@ import {
   useProducts,
   useReorderProducts,
   useSetProductStatus,
+  useTiers,
 } from "@/hooks/useScale";
 import { AppShell, FooterDot } from "@/components/shell/AppShell";
 import {
@@ -32,8 +33,10 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical } from "lucide-react";
+import { GripVertical, Plus } from "lucide-react";
 import { toast } from "sonner";
+import { ProductDrawer } from "@/components/scale/ProductDrawer";
+import { Button } from "@/components/ui/button";
 
 type BucketKey = "active" | "development" | "new" | "planned";
 
