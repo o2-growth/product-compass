@@ -19,6 +19,7 @@ interface Props {
   defaultTierId?: string;
   defaultLadderTrack?: "b2b" | "b2c" | null;
   defaultLadderGroup?: string;
+  defaultStatus?: import("@/types/scale").ProductStatus;
   tiers: Tier[];
   onClose: () => void;
 }
@@ -29,6 +30,7 @@ export function ProductDrawer({
   defaultTierId,
   defaultLadderTrack,
   defaultLadderGroup,
+  defaultStatus,
   tiers,
   onClose,
 }: Props) {
@@ -59,6 +61,7 @@ export function ProductDrawer({
             tier_ids: defaultTierId ? [defaultTierId] : [],
             ladder_track: defaultLadderTrack ?? null,
             ladder_group: defaultLadderGroup ?? "",
+            ...(defaultStatus ? { status: defaultStatus } : {}),
           }
         : undefined;
 
