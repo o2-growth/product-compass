@@ -70,10 +70,10 @@ export function AppShell({
                     key={item.to}
                     to={item.to}
                     className={cn(
-                      "rounded-full px-4 py-1.5 text-xs font-semibold transition-all lg:px-5 lg:text-sm",
+                      "rounded-full px-4 py-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.12em] transition-all lg:px-5",
                       isActive
-                        ? "bg-emerald text-white shadow-lg shadow-black/20"
-                        : "text-white/60 hover:text-white",
+                        ? "bg-accent text-accent-foreground shadow-lg shadow-black/30"
+                        : "text-white/55 hover:text-white",
                     )}
                   >
                     {item.label}
@@ -100,7 +100,7 @@ export function AppShell({
 
         {/* Status footer */}
         {(footerLeft || footerRight) && (
-          <footer className="flex shrink-0 items-center justify-between gap-4 border-t border-emerald-deep/10 bg-white px-6 py-3 text-[11px] font-semibold text-emerald-deep/50 lg:px-10">
+          <footer className="flex shrink-0 items-center justify-between gap-4 border-t border-white/10 bg-bg-elev-2 px-6 py-3 font-mono text-[10px] font-medium uppercase tracking-[0.12em] text-white/45 lg:px-10">
             <div className="flex flex-wrap gap-6">{footerLeft}</div>
             <div className="flex flex-wrap gap-4">{footerRight}</div>
           </footer>
@@ -118,7 +118,7 @@ export function FooterDot({
   children: ReactNode;
 }) {
   const cls =
-    color === "gold" ? "bg-gold" : color === "muted" ? "bg-emerald-deep/30" : "bg-emerald";
+    color === "gold" ? "bg-accent" : color === "muted" ? "bg-white/25" : "bg-accent";
   return (
     <div className="flex items-center gap-2">
       <span className={cn("h-2 w-2 rounded-full", cls)} />
