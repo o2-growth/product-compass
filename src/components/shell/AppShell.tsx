@@ -1,6 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
+import logoWhite from "@/assets/o2/logo-white.png";
 
 const NAV_ITEMS = [
   { to: "/", label: "Value Ladder" },
@@ -42,18 +43,21 @@ export function AppShell({
   });
 
   return (
-    <div className="min-h-dvh bg-cream p-3 lg:p-6">
-      <div className="mx-auto flex h-[calc(100dvh-1.5rem)] max-w-[1700px] flex-col overflow-hidden rounded-[32px] border border-emerald-deep/10 bg-white shadow-shell lg:h-[calc(100dvh-3rem)]">
+    <div className="min-h-dvh bg-bg p-3 lg:p-6">
+      <div className="mx-auto flex h-[calc(100dvh-1.5rem)] max-w-[1700px] flex-col overflow-hidden rounded-[32px] border border-white/10 bg-bg-elev shadow-shell lg:h-[calc(100dvh-3rem)]">
         {/* Top Navigation Bar */}
-        <header className="flex shrink-0 items-center justify-between gap-6 bg-emerald-deep px-6 py-4 lg:px-10 lg:py-5">
+        <header className="flex shrink-0 items-center justify-between gap-6 bg-bg-elev-2 px-6 py-4 lg:px-10 lg:py-5">
           <div className="flex items-center gap-6 lg:gap-10">
-            <div className="flex flex-col leading-tight">
-              <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-gold">
-                {eyebrow}
-              </span>
-              <h1 className="font-display text-base font-semibold text-white lg:text-lg">
-                {title}
-              </h1>
+            <div className="flex items-center gap-3">
+              <img src={logoWhite} alt="O2 Inc." className="h-7 w-auto" />
+              <div className="hidden flex-col leading-tight border-l border-white/15 pl-3 lg:flex">
+                <span className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-accent">
+                  {eyebrow}
+                </span>
+                <h1 className="font-display text-base font-normal uppercase tracking-wide text-white lg:text-lg">
+                  {title}
+                </h1>
+              </div>
             </div>
             <nav className="flex rounded-full bg-black/25 p-1">
               {NAV_ITEMS.map((item) => {
