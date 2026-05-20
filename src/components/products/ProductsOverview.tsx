@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useProducts } from "@/hooks/useScale";
+import { useProducts, useReorderProducts } from "@/hooks/useScale";
 import { AppShell, FooterDot } from "@/components/shell/AppShell";
 import {
   STATUS_DOT,
@@ -8,6 +8,22 @@ import {
   type ProductStatus,
 } from "@/types/scale";
 import { cn } from "@/lib/utils";
+import {
+  DndContext,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  arrayMove,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { GripVertical } from "lucide-react";
 
 type BucketKey = "active" | "development" | "new" | "planned";
 
@@ -43,15 +59,60 @@ function formatDate(iso: string | null | undefined) {
   }
 }
 
-function ProductCard({ product }: { product: Product }) {
+// id composto pra evitar colisão entre buckets (mesmo produto pode aparecer em "new" + outro)
+const sid = (bucket: BucketKey, productId: string) => `${bucket}::${productId}`;
+const parseSid = (id: string) => {
+  const [bucket, productId] = id.split("::");
+  return { bucket: bucket as BucketKey, productId };
+};
+
+function SortableProductCard({
+  product,
+  bucket,
+}: {
+  product: Product;
+  bucket: BucketKey;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: sid(bucket, product.id) });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
   const status = product.status as ProductStatus;
+
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-bg-elev-2 p-4 shadow-sm transition-colors hover:border-white/20">
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        "group relative flex flex-col gap-3 rounded-2xl border border-white/10 bg-bg-elev-2 p-4 shadow-sm transition-colors hover:border-white/20",
+        isDragging && "z-10 opacity-50",
+      )}
+    >
+      <button
+        type="button"
+        {...attributes}
+        {...listeners}
+        className="absolute right-2 top-2 cursor-grab rounded-md p-1 text-white/30 opacity-0 transition hover:bg-white/5 hover:text-white/70 group-hover:opacity-100 active:cursor-grabbing"
+        aria-label="Arrastar para reordenar"
+      >
+        <GripVertical className="h-3.5 w-3.5" />
+      </button>
+
       <div className="flex items-start gap-3">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-black/30 text-lg">
           {product.icon || "📦"}
         </div>
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 pr-6">
           <div className="flex items-center gap-2">
             <span
               className={cn(
@@ -88,14 +149,17 @@ function ProductCard({ product }: { product: Product }) {
 }
 
 function BucketColumn({
+  bucket,
   label,
   sub,
   products,
 }: {
+  bucket: BucketKey;
   label: string;
   sub: string;
   products: Product[];
 }) {
+  const itemIds = products.map((p) => sid(bucket, p.id));
   return (
     <div className="flex h-full min-h-0 flex-col rounded-3xl border border-white/10 bg-bg-elev p-4">
       <div className="mb-4 flex items-baseline justify-between gap-2 px-1">
@@ -117,7 +181,14 @@ function BucketColumn({
             Nenhum produto
           </div>
         ) : (
-          products.map((p) => <ProductCard key={p.id} product={p} />)
+          <SortableContext
+            items={itemIds}
+            strategy={verticalListSortingStrategy}
+          >
+            {products.map((p) => (
+              <SortableProductCard key={p.id} product={p} bucket={bucket} />
+            ))}
+          </SortableContext>
         )}
       </div>
     </div>
@@ -126,6 +197,11 @@ function BucketColumn({
 
 export function ProductsOverview() {
   const { data: products = [], isLoading } = useProducts();
+  const reorder = useReorderProducts();
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+  );
 
   const grouped = useMemo(() => {
     const map: Record<BucketKey, Product[]> = {
@@ -137,15 +213,38 @@ export function ProductsOverview() {
     for (const p of products) {
       for (const k of bucketsFor(p)) map[k].push(p);
     }
-    // ordena cada bucket por created_at desc
+    // ordena cada bucket por position_index asc (mesmo critério que useProducts usa globalmente)
     for (const k of Object.keys(map) as BucketKey[]) {
       map[k].sort(
-        (a, b) =>
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+        (a, b) => (a.position_index ?? 0) - (b.position_index ?? 0),
       );
     }
     return map;
   }, [products]);
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const from = parseSid(String(active.id));
+    const to = parseSid(String(over.id));
+    if (from.bucket !== to.bucket) return; // só reordena dentro do mesmo bucket
+
+    const list = grouped[from.bucket];
+    const oldIndex = list.findIndex((p) => p.id === from.productId);
+    const newIndex = list.findIndex((p) => p.id === to.productId);
+    if (oldIndex < 0 || newIndex < 0) return;
+
+    const reorderedList = arrayMove(list, oldIndex, newIndex);
+    // Reatribui os mesmos position_index ocupados (preserva slots globais)
+    const positions = list.map((p) => p.position_index ?? 0);
+    const updates = reorderedList.map((p, i) => ({
+      id: p.id,
+      position_index: positions[i],
+    }));
+
+    reorder.mutate(updates);
+  }
 
   return (
     <AppShell
@@ -158,7 +257,7 @@ export function ProductsOverview() {
           <FooterDot color="gold">{grouped.new.length} novos (30d)</FooterDot>
         </>
       }
-      footerRight={<span>Agrupado por status · ao lado do DIAP</span>}
+      footerRight={<span>Arraste pelo handle para reordenar dentro do bucket</span>}
     >
       <div className="h-full p-6 lg:p-8">
         {isLoading ? (
@@ -166,16 +265,23 @@ export function ProductsOverview() {
             Carregando...
           </div>
         ) : (
-          <div className="grid h-full min-h-0 grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4 lg:gap-6">
-            {BUCKETS.map((b) => (
-              <BucketColumn
-                key={b.key}
-                label={b.label}
-                sub={b.sub}
-                products={grouped[b.key]}
-              />
-            ))}
-          </div>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <div className="grid h-full min-h-0 grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4 lg:gap-6">
+              {BUCKETS.map((b) => (
+                <BucketColumn
+                  key={b.key}
+                  bucket={b.key}
+                  label={b.label}
+                  sub={b.sub}
+                  products={grouped[b.key]}
+                />
+              ))}
+            </div>
+          </DndContext>
         )}
       </div>
     </AppShell>
