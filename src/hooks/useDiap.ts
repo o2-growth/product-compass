@@ -33,6 +33,7 @@ export function useDiap() {
         .select(
           "id, diap_column, order_index, products!inner ( id, name, icon, avg_ticket, status )",
         )
+        .eq("products.status", "active")
         .order("order_index", { ascending: true });
 
       // Se tabela ainda não existe, devolve colunas vazias em vez de quebrar
