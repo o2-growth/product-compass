@@ -160,7 +160,7 @@ export function LadderStep({
         <button
           type="button"
           onClick={() => onAddProduct(group.name)}
-          className="flex h-5 w-5 items-center justify-center rounded-sm border border-dashed border-neutral-400 text-neutral-500 transition-colors hover:border-neutral-700 hover:bg-white hover:text-neutral-900"
+          className="flex h-5 w-5 items-center justify-center rounded-sm border border-dashed border-neutral-400 text-neutral-500 transition-colors hover:border-neutral-700 hover:bg-bg-elev hover:text-neutral-900"
           title={`Adicionar produto em ${group.name}`}
           aria-label={`Adicionar produto em ${group.name}`}
         >

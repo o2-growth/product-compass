@@ -59,7 +59,7 @@ function DiapCard({
           zIndex: isDragging ? 1000 : "auto",
         }}
         className={cn(
-          "group relative overflow-hidden rounded-2xl border border-gold/30 bg-emerald-deep p-4 shadow-lg shadow-emerald-deep/20 transition-all",
+          "group relative overflow-hidden rounded-2xl border border-gold/30 bg-bg-elev-2 p-4 shadow-lg shadow-emerald-deep/20 transition-all",
           !isDragging && "hover:-translate-y-0.5 hover:shadow-xl",
         )}
       >
@@ -70,7 +70,7 @@ function DiapCard({
             type="button"
             {...listeners}
             {...attributes}
-            className="flex h-6 w-6 cursor-grab items-center justify-center rounded-md text-gold/70 hover:bg-white/10 hover:text-gold active:cursor-grabbing"
+            className="flex h-6 w-6 cursor-grab items-center justify-center rounded-md text-gold/70 hover:bg-bg-elev/10 hover:text-gold active:cursor-grabbing"
             title="Arrastar"
             aria-label="Arrastar produto"
           >
@@ -110,7 +110,7 @@ function DiapCard({
               value={product.name}
               onSave={(name) => rename.mutateAsync({ id: product.product_id, name })}
               ariaLabel="Renomear produto"
-              inputClassName="text-sm font-semibold text-emerald-deep"
+              inputClassName="text-sm font-semibold text-white"
             />
           </h4>
           {product.avg_ticket != null && (
@@ -139,7 +139,7 @@ function DiapCard({
         zIndex: isDragging ? 1000 : "auto",
       }}
       className={cn(
-        "group relative rounded-2xl border border-emerald-deep/10 bg-white p-4 shadow-card transition-all",
+        "group relative rounded-2xl border border-white/10 bg-bg-elev p-4 shadow-card transition-all",
         !isDragging && "hover:-translate-y-0.5 hover:border-gold hover:shadow-card-hover",
       )}
     >
@@ -148,7 +148,7 @@ function DiapCard({
           type="button"
           {...listeners}
           {...attributes}
-          className="flex h-6 w-6 cursor-grab items-center justify-center rounded-md text-emerald-deep/40 hover:bg-emerald-deep/5 hover:text-emerald-deep active:cursor-grabbing"
+          className="flex h-6 w-6 cursor-grab items-center justify-center rounded-md text-white/40 hover:bg-bg-elev/5 hover:text-white active:cursor-grabbing"
           title="Arrastar"
           aria-label="Arrastar produto"
         >
@@ -160,7 +160,7 @@ function DiapCard({
             e.stopPropagation();
             onRemove(product.placement_id);
           }}
-          className="flex h-6 w-6 items-center justify-center rounded-md text-emerald-deep/40 hover:bg-red-500/10 hover:text-red-600"
+          className="flex h-6 w-6 items-center justify-center rounded-md text-white/40 hover:bg-red-500/10 hover:text-red-600"
           title="Remover desta coluna"
           aria-label="Remover desta coluna"
         >
@@ -178,24 +178,24 @@ function DiapCard({
         className="w-full cursor-pointer text-left outline-none"
       >
         <div className="mb-3 flex items-start justify-between">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-deep/5 text-base">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-bg-elev/5 text-base">
             {product.icon || "📦"}
           </div>
         </div>
-        <h4 className="font-display text-sm font-semibold leading-tight text-emerald-deep">
+        <h4 className="font-display text-sm font-semibold leading-tight text-white">
           <EditableText
             value={product.name}
             onSave={(name) => rename.mutateAsync({ id: product.product_id, name })}
             ariaLabel="Renomear produto"
-            inputClassName="text-sm font-semibold text-emerald-deep"
+            inputClassName="text-sm font-semibold text-white"
           />
         </h4>
         {product.avg_ticket != null && (
-          <div className="mt-4 flex items-center justify-between border-t border-emerald-deep/5 pt-3">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-deep/40">
+          <div className="mt-4 flex items-center justify-between border-t border-white/5 pt-3">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-white/40">
               Ticket
             </span>
-            <span className="text-xs font-bold text-emerald-deep">
+            <span className="text-xs font-bold text-white">
               {formatTicket(product.avg_ticket)}
             </span>
           </div>
@@ -232,12 +232,12 @@ export function DiapColumnView({
           <h3
             className={cn(
               "font-display text-sm font-bold tracking-wide",
-              meta.accent === "gold" ? "text-gold" : "text-emerald-deep",
+              meta.accent === "gold" ? "text-gold" : "text-white",
             )}
           >
             {meta.label}
           </h3>
-          <span className="text-[10px] font-medium uppercase tracking-wider text-emerald-deep/50">
+          <span className="text-[10px] font-medium uppercase tracking-wider text-white/50">
             {meta.sub}
           </span>
         </div>
@@ -245,7 +245,7 @@ export function DiapColumnView({
           className={cn(
             "rounded-full px-2 py-0.5 text-[10px] font-bold tabular-nums",
             count === 0
-              ? "bg-emerald-deep/5 text-emerald-deep/40"
+              ? "bg-bg-elev/5 text-white/40"
               : meta.accent === "gold"
                 ? "bg-gold text-white"
                 : "bg-emerald text-white",
@@ -261,16 +261,16 @@ export function DiapColumnView({
         className={cn(
           "flex flex-1 flex-col gap-3 rounded-3xl border-2 border-dashed border-transparent p-2 transition-colors",
           isOver && "border-gold bg-gold/5",
-          count === 0 && !isOver && "border-emerald-deep/10",
+          count === 0 && !isOver && "border-white/10",
         )}
       >
         {count === 0 ? (
           <div className="group/empty flex flex-1 cursor-default items-center justify-center rounded-2xl py-12 text-center">
             <div className="flex flex-col items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full border border-emerald-deep/10 text-emerald-deep/30 transition-colors group-hover/empty:border-gold group-hover/empty:text-gold">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-white/30 transition-colors group-hover/empty:border-gold group-hover/empty:text-gold">
                 <Plus className="h-4 w-4" />
               </div>
-              <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-emerald-deep/30">
+              <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-white/30">
                 Solte aqui
               </span>
             </div>

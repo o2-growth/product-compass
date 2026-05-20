@@ -215,7 +215,7 @@ export function OrgChart() {
           <>
             <Button
               size="sm"
-              className="gap-1.5 rounded-full bg-gold px-4 text-emerald-deep hover:bg-gold/90"
+              className="gap-1.5 rounded-full bg-gold px-4 text-white hover:bg-gold/90"
               onClick={openCreate}
             >
               <Plus className="h-4 w-4" /> Adicionar produto
@@ -234,7 +234,7 @@ export function OrgChart() {
                   className={cn(
                     "rounded-full px-3 py-1 text-xs font-bold tracking-wide transition-colors",
                     groupBy === key
-                      ? "bg-gold text-emerald-deep shadow"
+                      ? "bg-gold text-white shadow"
                       : "text-white/60 hover:text-white",
                   )}
                 >
