@@ -20,10 +20,10 @@ const COLUMN_META: Record<
   { label: string; sub: string; accent: "emerald" | "gold" | "muted"; isLuxa?: boolean }
 > = {
   "2P's": { label: "2P's", sub: "Planejamento", accent: "emerald" },
-  D: { label: "D", sub: "Diagnóstico", accent: "emerald" },
-  I: { label: "I", sub: "Implementação", accent: "emerald" },
+  D: { label: "D", sub: "Dados", accent: "emerald" },
+  I: { label: "I", sub: "Informação", accent: "emerald" },
   A: { label: "A", sub: "Análise", accent: "emerald" },
-  P: { label: "P", sub: "Performance", accent: "emerald" },
+  P: { label: "P", sub: "Plano de Ação", accent: "emerald" },
   LUXA: { label: "LUXA", sub: "Exit / Premium", accent: "gold", isLuxa: true },
 };
 
