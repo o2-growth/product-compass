@@ -5,11 +5,11 @@ export const Route = createFileRoute("/diap")({
   component: Diap,
   head: () => ({
     meta: [
-      { title: "DIAP — Product Compass" },
+      { title: "DIAP — Dados · Informação · Análise · Plano de Ação" },
       {
         name: "description",
         content:
-          "Metodologia DIAP da O2: 2P's · D · I · A · P · LUXA. Arraste produtos pras letras correspondentes ao processo de entrada do cliente.",
+          "Metodologia DIAP da O2: Dados → Informação → Análise → Plano de Ação. Arraste produtos pras etapas correspondentes da jornada do cliente.",
       },
     ],
   }),

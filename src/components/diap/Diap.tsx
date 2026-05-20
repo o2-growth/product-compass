@@ -90,7 +90,7 @@ export function Diap() {
     <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
       <AppShell
         eyebrow="Metodologia"
-        title="DIAP — Jornada do cliente"
+        title="DIAP — Dados · Informação · Análise · Plano de Ação"
         flushMain
         sidebar={<ProductsSidebar onOpenProduct={openEdit} />}
         actions={
