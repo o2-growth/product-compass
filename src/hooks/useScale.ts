@@ -505,3 +505,54 @@ export function useReorderProducts() {
     },
   });
 }
+
+/**
+ * Atualiza status e (opcionalmente) position_index de um produto.
+ * Usado quando o usuário arrasta um card entre colunas/buckets.
+ */
+export function useSetProductStatus() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      id,
+      status,
+      position_index,
+    }: {
+      id: string;
+      status: ProductStatus;
+      position_index?: number;
+    }) => {
+      const patch: any = { status };
+      if (typeof position_index === "number") patch.position_index = position_index;
+      const { error } = await supabase.from("products").update(patch).eq("id", id);
+      if (error) throw error;
+    },
+    onMutate: async ({ id, status, position_index }) => {
+      await qc.cancelQueries({ queryKey: PRODUCTS_KEY });
+      const prev = qc.getQueryData<Product[]>(PRODUCTS_KEY);
+      qc.setQueryData<Product[]>(PRODUCTS_KEY, (old) =>
+        old?.map((p) =>
+          p.id === id
+            ? {
+                ...p,
+                status,
+                position_index:
+                  typeof position_index === "number"
+                    ? position_index
+                    : p.position_index,
+              }
+            : p,
+        ),
+      );
+      return { prev };
+    },
+    onError: (e: any, _v, ctx) => {
+      if (ctx?.prev) qc.setQueryData(PRODUCTS_KEY, ctx.prev);
+      toast.error(e?.message ?? "Erro ao mover");
+    },
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: PRODUCTS_KEY });
+      qc.invalidateQueries({ queryKey: ["ladder"] });
+    },
+  });
+}
