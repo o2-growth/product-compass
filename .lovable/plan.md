@@ -1,42 +1,40 @@
 ## Objetivo
 
-Fazer o DIAP se comportar igual ao Value Ladder:
-1. Produtos com status diferente de `active` (planejado/desenvolvimento) NÃO aparecem no board do DIAP.
-2. Ao desligar um produto na sidebar, ele some do DIAP. Ao religar, volta a aparecer (placement preservado).
-3. Garantir que todo produto ativo que está no Ladder também tenha um placement no DIAP (e vice-versa), para os boards conversarem.
+Adicionar uma nova página **Produtos** ao lado de DIAP no nav, mostrando todos os produtos agrupados em 4 buckets com as propriedades selecionadas.
 
-## Diagnóstico
+## Buckets (decisão do usuário)
 
-**Ladder** (`src/hooks/useLadder.ts` linha 73) filtra `.eq("products.status", "active")` no join — produto inativo some.
+1. **Ativos** — `status = 'active'`
+2. **Em planejamento** — `status = 'development'`
+3. **Novos** — `created_at >= now() - 30 dias` (independente do status; um produto novo aparece tanto aqui quanto no bucket do próprio status)
+4. **Futuros** — `status = 'planned'`
 
-**DIAP** (`src/hooks/useDiap.ts` linha 31-36) NÃO filtra por status — qualquer produto com placement aparece, mesmo `planned`/`development`. Por isso "Growth Oxigênio", "NOX Enterprise", "MBA / Pós em Finanças", "Treinamentos Financeiros", "Consultoria Comercial e de Marketing", "Consultoria de Precificação", "Soluções de Crédito" aparecem indevidamente.
+## Propriedades exibidas em cada card
 
-**Gap Ladder ↔ DIAP** (snapshot atual do banco):
-- No Ladder mas **fora do DIAP** (ativos): `BPO Financeiro` (está no DIAP ok), `Franquia O2` (sem coluna DIAP), `Oxy Hacker` (sem coluna DIAP).
-- No DIAP mas **fora do Ladder**: nenhum produto ativo problemático.
-- Produtos com placement DIAP mas sem coluna (`diap_column` vazio): `Franquia O2`, `Oxy Hacker` — placements lixo da migração antiga; serão limpos.
+- Ícone + nome (com dot de status)
+- Label do status ("Ativo" / "Em desenvolvimento" / "Planejado")
+- Notas internas (`internal_notes`)
+- Criado por (`created_by`)
+- Data de criação (curtinha, ajuda contexto pra bucket "Novos")
 
 ## Mudanças
 
-### 1. `src/hooks/useDiap.ts`
-Adicionar filtro de status na query do `useDiap()`:
-```ts
-.select("id, diap_column, order_index, products!inner ( id, name, icon, avg_ticket, status )")
-.eq("products.status", "active")
-.order("order_index", { ascending: true });
-```
-Mesma lógica do Ladder: o `!inner` + filtro descarta placements de produtos não-ativos sem perdê-los do banco — quando o usuário religar, o placement volta a aparecer.
+### 1. Nova rota `src/routes/products.tsx`
+- `createFileRoute("/products")` com `head()` próprio (title/description).
+- Renderiza componente `<ProductsOverview />`.
 
-### 2. Limpeza de dados (migration / insert tool)
-- Deletar os 2 placements órfãos com `diap_column = ''` (Franquia O2, Oxy Hacker).
-- Como ficam "ativos fora do DIAP", deixar a sidebar pedindo posicionamento manual — usuário arrasta para a coluna desejada (decisão já confirmada por ele: "deixe na lista aqui de produtos, para eu definir quais devem entrar").
+### 2. Novo componente `src/components/products/ProductsOverview.tsx`
+- Usa `useProducts()` (hook já existente).
+- Calcula os 4 buckets em memória via `useMemo`.
+- Renderiza dentro de `<AppShell>` com 4 colunas (mesma estética do DIAP — header da coluna + grid de cards), responsivo: `grid-cols-1 md:grid-cols-2 xl:grid-cols-4`.
+- Cada card reaproveita o visual já consolidado (mesmas tokens `bg-bg-elev`, badges de status `STATUS_DOT`/`STATUS_LABEL` de `@/types/scale`).
+- Footer mostra contadores por bucket.
 
-### 3. Sidebar (sem mudança de comportamento, só verificação)
-A sidebar já lista TODOS os produtos (ativos e inativos) com o toggle de status. Vai continuar assim — o filtro só afeta o board do DIAP, igual ao Ladder.
+### 3. `src/components/shell/AppShell.tsx`
+- Adicionar `{ to: "/products", label: "Produtos" }` ao `NAV_ITEMS` (entre DIAP e o fim).
 
-## Resultado esperado
+## Resultado
 
-- Toggle off em qualquer produto → some do Ladder E do DIAP imediatamente.
-- Toggle on → reaparece nos dois boards no placement antigo.
-- Produtos sem placement DIAP (Franquia O2, Oxy Hacker) ficam visíveis na sidebar com indicador, prontos pra arrastar.
-- DIAP e Ladder passam a mostrar o mesmo conjunto de produtos ativos.
+- Nova aba "Produtos" no nav do topo.
+- Página `/products` lado-a-lado conceitual com DIAP, mostrando 4 colunas (Ativos, Em planejamento, Novos, Futuros) com cards exibindo nome, ícone, status, notas internas e criado por.
+- Dados reativos: criar/editar/desligar produto na sidebar do DIAP atualiza essa página automaticamente (mesma query key `["products"]`).

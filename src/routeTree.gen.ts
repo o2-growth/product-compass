@@ -9,10 +9,16 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ProductsRouteImport } from './routes/products'
 import { Route as LadderRouteImport } from './routes/ladder'
 import { Route as DiapRouteImport } from './routes/diap'
 import { Route as IndexRouteImport } from './routes/index'
 
+const ProductsRoute = ProductsRouteImport.update({
+  id: '/products',
+  path: '/products',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LadderRoute = LadderRouteImport.update({
   id: '/ladder',
   path: '/ladder',
@@ -33,34 +39,45 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/diap': typeof DiapRoute
   '/ladder': typeof LadderRoute
+  '/products': typeof ProductsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/diap': typeof DiapRoute
   '/ladder': typeof LadderRoute
+  '/products': typeof ProductsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/diap': typeof DiapRoute
   '/ladder': typeof LadderRoute
+  '/products': typeof ProductsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/diap' | '/ladder'
+  fullPaths: '/' | '/diap' | '/ladder' | '/products'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/diap' | '/ladder'
-  id: '__root__' | '/' | '/diap' | '/ladder'
+  to: '/' | '/diap' | '/ladder' | '/products'
+  id: '__root__' | '/' | '/diap' | '/ladder' | '/products'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DiapRoute: typeof DiapRoute
   LadderRoute: typeof LadderRoute
+  ProductsRoute: typeof ProductsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/products': {
+      id: '/products'
+      path: '/products'
+      fullPath: '/products'
+      preLoaderRoute: typeof ProductsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ladder': {
       id: '/ladder'
       path: '/ladder'
@@ -89,6 +106,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DiapRoute: DiapRoute,
   LadderRoute: LadderRoute,
+  ProductsRoute: ProductsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
