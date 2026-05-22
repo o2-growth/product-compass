@@ -4,9 +4,9 @@ import type { ReactNode } from "react";
 import logoWhite from "@/assets/o2/logo-white.png";
 
 const NAV_ITEMS = [
-  { to: "/", label: "Value Ladder" },
-  { to: "/diap", label: "DIAP" },
   { to: "/products", label: "Produtos" },
+  { to: "/ladder", label: "Value Ladder" },
+  { to: "/diap", label: "DIAP" },
 ] as const;
 
 interface AppShellProps {
@@ -60,10 +60,7 @@ export function AppShell({
             </div>
             <nav className="flex rounded-full bg-black/25 p-1">
               {NAV_ITEMS.map((item) => {
-                const isActive =
-                  item.to === "/"
-                    ? currentPath === "/"
-                    : currentPath.startsWith(item.to);
+                const isActive = currentPath.startsWith(item.to);
                 return (
                   <Link
                     key={item.to}
