@@ -60,10 +60,7 @@ export function AppShell({
             </div>
             <nav className="flex rounded-full bg-black/25 p-1">
               {NAV_ITEMS.map((item) => {
-                const isActive =
-                  item.to === "/"
-                    ? currentPath === "/"
-                    : currentPath.startsWith(item.to);
+                const isActive = currentPath.startsWith(item.to);
                 return (
                   <Link
                     key={item.to}
