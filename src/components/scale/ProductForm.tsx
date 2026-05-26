@@ -102,8 +102,8 @@ export function ProductForm({
   };
 
   return (
-    <form onSubmit={submit} className="flex h-full flex-col">
-      <div className="flex-1 space-y-4 overflow-y-auto p-5">
+    <form onSubmit={submit} className="flex min-h-0 flex-1 flex-col">
+      <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-5">
         <div className="grid grid-cols-[80px_1fr] gap-3">
           <div>
             <Label htmlFor="icon">Ícone</Label>
