@@ -1,5 +1,20 @@
 export type ProductStatus = "active" | "development" | "planned";
 export type LadderTrack = "b2b" | "b2c";
+export type BillingType = "pontual" | "recorrente";
+
+export interface Category {
+  id: string;
+  name: string;
+  order_index: number;
+  color: string | null;
+}
+
+export interface Subcategory {
+  id: string;
+  category_id: string;
+  name: string;
+  order_index: number;
+}
 
 export interface Tier {
   id: string;
@@ -37,6 +52,9 @@ export interface Product {
   ladder_order: number | null;
   created_by: string | null;
   ladder_placements: LadderPlacement[];
+  category_id: string | null;
+  subcategory_id: string | null;
+  billing_type: BillingType | null;
 }
 
 export interface ProductFormData {
@@ -53,6 +71,9 @@ export interface ProductFormData {
   ladder_order: number | null;
   created_by: string;
   diap_columns: string[];
+  category_id: string | null;
+  subcategory_id: string | null;
+  billing_type: BillingType | null;
 }
 
 export const STATUS_LABEL: Record<ProductStatus, string> = {

@@ -25,7 +25,6 @@ import {
   useRemoveDiapPlacement,
   type DiapColumn,
 } from "@/hooks/useDiap";
-
 interface Props {
   mode: "create" | "edit" | null;
   product?: Product;
@@ -33,6 +32,7 @@ interface Props {
   defaultLadderTrack?: "b2b" | "b2c" | null;
   defaultLadderGroup?: string;
   defaultStatus?: import("@/types/scale").ProductStatus;
+  defaultCategoryId?: string;
   tiers: Tier[];
   onClose: () => void;
   /** "sheet" (padrão) = painel lateral · "dialog" = modal centralizado */
@@ -46,6 +46,7 @@ export function ProductDrawer({
   defaultLadderTrack,
   defaultLadderGroup,
   defaultStatus,
+  defaultCategoryId,
   tiers,
   onClose,
   variant = "sheet",
@@ -81,6 +82,9 @@ export function ProductDrawer({
           ladder_order: product.ladder_order,
           created_by: product.created_by ?? "",
           diap_columns: currentDiapCols,
+          category_id: product.category_id,
+          subcategory_id: product.subcategory_id,
+          billing_type: product.billing_type,
         }
       : mode === "create"
         ? {
@@ -88,8 +92,10 @@ export function ProductDrawer({
             ladder_track: defaultLadderTrack ?? null,
             ladder_group: defaultLadderGroup ?? "",
             diap_columns: [],
+            category_id: defaultCategoryId ?? null,
             ...(defaultStatus ? { status: defaultStatus } : {}),
           }
+        : undefined;
         : undefined;
 
   const handleSubmit = async (form: ProductFormData) => {
