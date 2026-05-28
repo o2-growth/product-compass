@@ -114,10 +114,6 @@ export function useCreateProduct() {
         .insert(base)
         .select()
         .single();
-        .from("products")
-        .insert(base)
-        .select()
-        .single();
       // Retry sem created_by se a coluna ainda não existe no schema
       if (error && isMissingColumn(error, "created_by")) {
         const { created_by, ...withoutCreatedBy } = base;
@@ -164,6 +160,9 @@ export function useUpdateProduct() {
         ladder_group: form.ladder_group || null,
         ladder_order: form.ladder_order ?? 0,
         created_by: form.created_by || null,
+        category_id: form.category_id,
+        subcategory_id: form.subcategory_id,
+        billing_type: form.billing_type,
       };
       let { error } = await supabase.from("products").update(base).eq("id", id);
       if (error && isMissingColumn(error, "created_by")) {
