@@ -8,6 +8,9 @@ import {
   Search,
   GripVertical,
   ArrowUpDown,
+  Settings2,
+  RotateCw,
+  Repeat,
 } from "lucide-react";
 import {
   DndContext,
@@ -32,8 +35,13 @@ import {
   useSetProductStatus,
   useTiers,
 } from "@/hooks/useScale";
+import {
+  useCategories,
+  useSubcategories,
+} from "@/hooks/useCategories";
 import { useDiap } from "@/hooks/useDiap";
 import { ProductDrawer } from "@/components/scale/ProductDrawer";
+import { CategoryManagerDrawer } from "@/components/products/CategoryManagerDrawer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -54,7 +62,7 @@ import {
 } from "@/components/ui/table";
 import {
   STATUS_DOT,
-  STATUS_LABEL,
+  type BillingType,
   type Product,
   type ProductStatus,
 } from "@/types/scale";
@@ -72,6 +80,13 @@ const STATUS_FILTER_OPTIONS: { value: ProductStatus | "all"; label: string }[] =
     { value: "development", label: "Em desenvolvimento" },
     { value: "planned", label: "Planejados" },
   ];
+
+const BILLING_FILTER: { value: BillingType | "all" | "none"; label: string }[] = [
+  { value: "all", label: "Todas cobranças" },
+  { value: "pontual", label: "Pontual" },
+  { value: "recorrente", label: "Recorrente" },
+  { value: "none", label: "Sem cobrança" },
+];
 
 function SortHeader({
   label,
@@ -139,43 +154,56 @@ function StatusCell({ product }: { product: Product }) {
   );
 }
 
+function BillingBadge({ type }: { type: BillingType | null }) {
+  if (!type) return <span className="text-white/30">—</span>;
+  if (type === "recorrente") {
+    return (
+      <Badge
+        variant="outline"
+        className="gap-1 border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0 text-[10px] text-emerald-300"
+      >
+        <Repeat className="h-2.5 w-2.5" /> Recorrente
+      </Badge>
+    );
+  }
+  return (
+    <Badge
+      variant="outline"
+      className="gap-1 border-amber-500/30 bg-amber-500/10 px-1.5 py-0 text-[10px] text-amber-300"
+    >
+      <RotateCw className="h-2.5 w-2.5" /> Pontual
+    </Badge>
+  );
+}
+
 function RowCells({
   product,
   tierMap,
   diapByProduct,
+  subcatMap,
+  catMap,
+  showCategory,
   reorderMode,
   onEdit,
 }: {
   product: Product;
   tierMap: Map<string, string>;
   diapByProduct: Map<string, string[]>;
+  subcatMap: Map<string, string>;
+  catMap: Map<string, string>;
+  showCategory: boolean;
   reorderMode: boolean;
   onEdit: (id: string) => void;
 }) {
-  const b2b = (() => {
-    const pl = product.ladder_placements?.filter(
-      (lp) => lp.ladder_track === "b2b",
-    );
-    if (pl?.length) return pl.map((lp) => lp.ladder_group).join(", ");
-    if (product.ladder_track === "b2b" && product.ladder_group)
-      return product.ladder_group;
-    return null;
-  })();
-
-  const b2c = (() => {
-    const pl = product.ladder_placements?.filter(
-      (lp) => lp.ladder_track === "b2c",
-    );
-    if (pl?.length) return pl.map((lp) => lp.ladder_group).join(", ");
-    if (product.ladder_track === "b2c" && product.ladder_group)
-      return product.ladder_group;
-    return null;
-  })();
-
   const diap = diapByProduct.get(product.id) ?? [];
   const tierNames = product.tier_ids
     .map((id) => tierMap.get(id))
     .filter(Boolean) as string[];
+
+  const subcatName = product.subcategory_id
+    ? subcatMap.get(product.subcategory_id)
+    : null;
+  const catName = product.category_id ? catMap.get(product.category_id) : null;
 
   return (
     <>
@@ -190,8 +218,35 @@ function RowCells({
         )}
       </TableCell>
 
+      {showCategory && (
+        <TableCell>
+          {catName ? (
+            <Badge
+              variant="outline"
+              className="border-white/15 px-1.5 py-0 text-[10px] text-white/70"
+            >
+              {catName}
+            </Badge>
+          ) : (
+            <span className="text-white/30">—</span>
+          )}
+        </TableCell>
+      )}
+
+      <TableCell>
+        {subcatName ? (
+          <span className="text-xs text-white/75">{subcatName}</span>
+        ) : (
+          <span className="text-white/30">—</span>
+        )}
+      </TableCell>
+
       <TableCell onClick={(e) => e.stopPropagation()}>
         <StatusCell product={product} />
+      </TableCell>
+
+      <TableCell>
+        <BillingBadge type={product.billing_type} />
       </TableCell>
 
       <TableCell className="text-right font-mono text-sm tabular-nums">
@@ -221,32 +276,6 @@ function RowCells({
       </TableCell>
 
       <TableCell>
-        {b2b ? (
-          <Badge
-            variant="outline"
-            className="border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0 text-[10px] text-emerald-300"
-          >
-            {b2b}
-          </Badge>
-        ) : (
-          <span className="text-white/30">—</span>
-        )}
-      </TableCell>
-
-      <TableCell>
-        {b2c ? (
-          <Badge
-            variant="outline"
-            className="border-blue-500/30 bg-blue-500/10 px-1.5 py-0 text-[10px] text-blue-300"
-          >
-            {b2c}
-          </Badge>
-        ) : (
-          <span className="text-white/30">—</span>
-        )}
-      </TableCell>
-
-      <TableCell>
         <div className="flex flex-wrap gap-1">
           {diap.length > 0 ? (
             diap.map((col) => (
@@ -262,10 +291,6 @@ function RowCells({
             <span className="text-white/30">—</span>
           )}
         </div>
-      </TableCell>
-
-      <TableCell className="text-xs text-white/40">
-        {product.created_by || <span className="text-white/20">—</span>}
       </TableCell>
 
       {!reorderMode && (
@@ -285,15 +310,13 @@ function RowCells({
   );
 }
 
-function SortableRow({
-  product,
-  tierMap,
-  diapByProduct,
-  onEdit,
-}: {
+function SortableRow(props: {
   product: Product;
   tierMap: Map<string, string>;
   diapByProduct: Map<string, string[]>;
+  subcatMap: Map<string, string>;
+  catMap: Map<string, string>;
+  showCategory: boolean;
   onEdit: (id: string) => void;
 }) {
   const {
@@ -303,7 +326,7 @@ function SortableRow({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: product.id });
+  } = useSortable({ id: props.product.id });
 
   return (
     <TableRow
@@ -315,7 +338,6 @@ function SortableRow({
       }}
       className="group border-white/5 transition-colors hover:bg-white/5"
     >
-      {/* Drag handle */}
       <TableCell className="w-8 px-2">
         <button
           type="button"
@@ -327,13 +349,7 @@ function SortableRow({
           <GripVertical className="h-4 w-4" />
         </button>
       </TableCell>
-      <RowCells
-        product={product}
-        tierMap={tierMap}
-        diapByProduct={diapByProduct}
-        reorderMode={true}
-        onEdit={onEdit}
-      />
+      <RowCells {...props} reorderMode={true} />
     </TableRow>
   );
 }
@@ -342,15 +358,22 @@ export function ProductsTable() {
   const { data: products = [], isLoading } = useProducts();
   const { data: tiers = [] } = useTiers();
   const { data: diapColumns = [] } = useDiap();
+  const { data: categories = [] } = useCategories();
+  const { data: subcategories = [] } = useSubcategories();
   const reorder = useReorderProducts();
 
   const [drawerMode, setDrawerMode] = useState<"create" | "edit" | null>(null);
   const [editingId, setEditingId] = useState<string | undefined>(undefined);
   const [reorderMode, setReorderMode] = useState(false);
   const [activeProduct, setActiveProduct] = useState<Product | null>(null);
+  const [managerOpen, setManagerOpen] = useState(false);
 
+  const [activeCategoryId, setActiveCategoryId] = useState<string | "all" | "uncategorized">("all");
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<ProductStatus | "all">("all");
+  const [billingFilter, setBillingFilter] = useState<BillingType | "all" | "none">("all");
+  const [subcategoryFilter, setSubcategoryFilter] = useState<string | "all">("all");
+  const [groupBySubcat, setGroupBySubcat] = useState(false);
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
 
@@ -358,10 +381,9 @@ export function ProductsTable() {
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
   );
 
-  const tierMap = useMemo(
-    () => new Map(tiers.map((t) => [t.id, t.name])),
-    [tiers],
-  );
+  const tierMap = useMemo(() => new Map(tiers.map((t) => [t.id, t.name])), [tiers]);
+  const catMap = useMemo(() => new Map(categories.map((c) => [c.id, c.name])), [categories]);
+  const subcatMap = useMemo(() => new Map(subcategories.map((s) => [s.id, s.name])), [subcategories]);
 
   const diapByProduct = useMemo(() => {
     const map = new Map<string, string[]>();
@@ -379,6 +401,11 @@ export function ProductsTable() {
     [editingId, products],
   );
 
+  const subcatsForActive = useMemo(() => {
+    if (activeCategoryId === "all" || activeCategoryId === "uncategorized") return [];
+    return subcategories.filter((s) => s.category_id === activeCategoryId);
+  }, [subcategories, activeCategoryId]);
+
   const handleSort = (key: SortKey) => {
     if (key === sortKey) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
     else {
@@ -387,11 +414,25 @@ export function ProductsTable() {
     }
   };
 
-  const rows = useMemo(() => {
+  const filtered = useMemo(() => {
     let list = [...products];
 
-    if (statusFilter !== "all")
-      list = list.filter((p) => p.status === statusFilter);
+    if (activeCategoryId === "uncategorized") {
+      list = list.filter((p) => !p.category_id);
+    } else if (activeCategoryId !== "all") {
+      list = list.filter((p) => p.category_id === activeCategoryId);
+    }
+
+    if (statusFilter !== "all") list = list.filter((p) => p.status === statusFilter);
+
+    if (billingFilter !== "all") {
+      if (billingFilter === "none") list = list.filter((p) => !p.billing_type);
+      else list = list.filter((p) => p.billing_type === billingFilter);
+    }
+
+    if (subcategoryFilter !== "all") {
+      list = list.filter((p) => p.subcategory_id === subcategoryFilter);
+    }
 
     const q = query.trim().toLowerCase();
     if (q) list = list.filter((p) => p.name.toLowerCase().includes(q));
@@ -406,26 +447,33 @@ export function ProductsTable() {
         else if (sortKey === "avg_ticket")
           cmp = (a.avg_ticket ?? 0) - (b.avg_ticket ?? 0);
         else if (sortKey === "created_at")
-          cmp =
-            new Date(a.created_at).getTime() -
-            new Date(b.created_at).getTime();
+          cmp = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
         return sortDir === "asc" ? cmp : -cmp;
       });
     }
 
     return list;
-  }, [products, statusFilter, query, sortKey, sortDir, reorderMode]);
+  }, [products, activeCategoryId, statusFilter, billingFilter, subcategoryFilter, query, sortKey, sortDir, reorderMode]);
+
+  const grouped = useMemo(() => {
+    if (!groupBySubcat) return null;
+    const groups = new Map<string, Product[]>();
+    for (const p of filtered) {
+      const key = p.subcategory_id ? subcatMap.get(p.subcategory_id) ?? "Sem subcategoria" : "Sem subcategoria";
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key)!.push(p);
+    }
+    return Array.from(groups.entries()).sort(([a], [b]) => a.localeCompare(b, "pt-BR"));
+  }, [filtered, groupBySubcat, subcatMap]);
 
   const openEdit = (id: string) => {
     setEditingId(id);
     setDrawerMode("edit");
   };
-
   const openCreate = () => {
     setEditingId(undefined);
     setDrawerMode("create");
   };
-
   const closeDrawer = () => {
     setDrawerMode(null);
     setEditingId(undefined);
@@ -440,12 +488,44 @@ export function ProductsTable() {
     setActiveProduct(null);
     const { active, over } = e;
     if (!over || active.id === over.id) return;
-    const oldIndex = rows.findIndex((p) => p.id === active.id);
-    const newIndex = rows.findIndex((p) => p.id === over.id);
+    const oldIndex = filtered.findIndex((p) => p.id === active.id);
+    const newIndex = filtered.findIndex((p) => p.id === over.id);
     if (oldIndex < 0 || newIndex < 0) return;
-    const reordered = arrayMove(rows, oldIndex, newIndex);
+    const reordered = arrayMove(filtered, oldIndex, newIndex);
     reorder.mutate(reordered.map((p, i) => ({ id: p.id, position_index: i })));
   }
+
+  const showCategoryCol = activeCategoryId === "all" || activeCategoryId === "uncategorized";
+
+  const defaultCategoryIdForCreate =
+    activeCategoryId !== "all" && activeCategoryId !== "uncategorized"
+      ? activeCategoryId
+      : undefined;
+
+  const renderRows = (list: Product[]) => (
+    <>
+      {list.map((product) => (
+        <TableRow
+          key={product.id}
+          onClick={() => openEdit(product.id)}
+          className="group cursor-pointer border-white/5 transition-colors hover:bg-white/5"
+        >
+          <RowCells
+            product={product}
+            tierMap={tierMap}
+            diapByProduct={diapByProduct}
+            subcatMap={subcatMap}
+            catMap={catMap}
+            showCategory={showCategoryCol}
+            reorderMode={false}
+            onEdit={openEdit}
+          />
+        </TableRow>
+      ))}
+    </>
+  );
+
+  const colCount = showCategoryCol ? 9 : 8;
 
   return (
     <>
@@ -454,24 +534,34 @@ export function ProductsTable() {
         title="Produtos"
         flushMain
         actions={
-          <Button
-            size="sm"
-            className="gap-1.5 rounded-full bg-gold px-4 text-white hover:bg-gold/90"
-            onClick={openCreate}
-          >
-            <Plus className="h-4 w-4" /> Novo produto
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-1.5 rounded-full"
+              onClick={() => setManagerOpen(true)}
+            >
+              <Settings2 className="h-4 w-4" /> Categorias
+            </Button>
+            <Button
+              size="sm"
+              className="gap-1.5 rounded-full bg-gold px-4 text-white hover:bg-gold/90"
+              onClick={openCreate}
+            >
+              <Plus className="h-4 w-4" /> Novo produto
+            </Button>
+          </div>
         }
         footerLeft={
           <FooterDot color="emerald">
-            {rows.length} de {products.length} produtos
+            {filtered.length} de {products.length} produtos
           </FooterDot>
         }
         footerRight={
           <span>
             {reorderMode
               ? "Arraste as linhas para reordenar · clique em Concluir quando terminar"
-              : "Clique na linha para editar · status editável direto na tabela"}
+              : "Clique na linha para editar"}
           </span>
         }
       >
@@ -482,8 +572,44 @@ export function ProductsTable() {
           onDragCancel={() => setActiveProduct(null)}
         >
           <div className="flex h-full flex-col">
+            {/* Tabs por categoria */}
+            <div className="flex shrink-0 items-center gap-1 overflow-x-auto border-b border-white/10 px-6 py-2">
+              {(
+                [{ id: "all", name: "Todas" }, ...categories, { id: "uncategorized", name: "Sem categoria" }] as { id: string; name: string }[]
+              ).map((c) => {
+                const active = activeCategoryId === c.id;
+                const count =
+                  c.id === "all"
+                    ? products.length
+                    : c.id === "uncategorized"
+                      ? products.filter((p) => !p.category_id).length
+                      : products.filter((p) => p.category_id === c.id).length;
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => {
+                      setActiveCategoryId(c.id as any);
+                      setSubcategoryFilter("all");
+                    }}
+                    className={cn(
+                      "flex items-center gap-2 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
+                      active
+                        ? "bg-accent text-accent-foreground shadow"
+                        : "text-white/55 hover:bg-white/5 hover:text-white",
+                    )}
+                  >
+                    {c.name}
+                    <span className={cn("rounded-full px-1.5 py-0.5 text-[10px]", active ? "bg-black/20" : "bg-white/10")}>
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
             {/* Toolbar */}
-            <div className="flex shrink-0 items-center gap-3 border-b border-white/10 px-6 py-3">
+            <div className="flex shrink-0 flex-wrap items-center gap-3 border-b border-white/10 px-6 py-3">
               <div className="relative max-w-xs flex-1">
                 <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/40" />
                 <Input
@@ -496,25 +622,67 @@ export function ProductsTable() {
               </div>
 
               {!reorderMode && (
-                <div className="flex items-center gap-1 rounded-full bg-black/25 p-1">
-                  {STATUS_FILTER_OPTIONS.map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() =>
-                        setStatusFilter(opt.value as ProductStatus | "all")
-                      }
-                      className={cn(
-                        "rounded-full px-3 py-1 text-[11px] font-medium transition-colors",
-                        statusFilter === opt.value
-                          ? "bg-accent text-accent-foreground shadow"
-                          : "text-white/55 hover:text-white",
-                      )}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
+                <>
+                  <div className="flex items-center gap-1 rounded-full bg-black/25 p-1">
+                    {STATUS_FILTER_OPTIONS.map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => setStatusFilter(opt.value)}
+                        className={cn(
+                          "rounded-full px-3 py-1 text-[11px] font-medium transition-colors",
+                          statusFilter === opt.value
+                            ? "bg-accent text-accent-foreground shadow"
+                            : "text-white/55 hover:text-white",
+                        )}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <Select value={billingFilter} onValueChange={(v) => setBillingFilter(v as any)}>
+                    <SelectTrigger className="h-8 w-[170px] rounded-full border-white/10 bg-white/5 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {BILLING_FILTER.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value} className="text-xs">
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  {subcatsForActive.length > 0 && (
+                    <Select value={subcategoryFilter} onValueChange={(v) => setSubcategoryFilter(v)}>
+                      <SelectTrigger className="h-8 w-[200px] rounded-full border-white/10 bg-white/5 text-xs">
+                        <SelectValue placeholder="Subcategoria" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all" className="text-xs">Todas subcategorias</SelectItem>
+                        {subcatsForActive.map((s) => (
+                          <SelectItem key={s.id} value={s.id} className="text-xs">
+                            {s.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => setGroupBySubcat((v) => !v)}
+                    className={cn(
+                      "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-medium transition-colors",
+                      groupBySubcat
+                        ? "border-accent bg-accent/20 text-accent"
+                        : "border-white/15 text-white/55 hover:border-white/30 hover:text-white",
+                    )}
+                  >
+                    Agrupar por subcategoria
+                  </button>
+                </>
               )}
 
               <div className="ml-auto">
@@ -540,7 +708,7 @@ export function ProductsTable() {
                 <div className="flex h-64 items-center justify-center text-sm text-muted-foreground">
                   Carregando...
                 </div>
-              ) : rows.length === 0 ? (
+              ) : filtered.length === 0 ? (
                 <div className="flex h-64 items-center justify-center text-sm text-muted-foreground">
                   Nenhum produto encontrado.
                 </div>
@@ -554,84 +722,63 @@ export function ProductsTable() {
                         {reorderMode ? (
                           <span className="font-semibold text-white/50">Nome</span>
                         ) : (
-                          <SortHeader
-                            label="Nome"
-                            sortKey="name"
-                            current={sortKey}
-                            dir={sortDir}
-                            onSort={handleSort}
-                          />
+                          <SortHeader label="Nome" sortKey="name" current={sortKey} dir={sortDir} onSort={handleSort} />
                         )}
                       </TableHead>
+                      {showCategoryCol && <TableHead className="text-white/50">Categoria</TableHead>}
+                      <TableHead className="text-white/50">Subcategoria</TableHead>
                       <TableHead className="text-white/50">
                         {reorderMode ? (
                           <span className="font-semibold text-white/50">Status</span>
                         ) : (
-                          <SortHeader
-                            label="Status"
-                            sortKey="status"
-                            current={sortKey}
-                            dir={sortDir}
-                            onSort={handleSort}
-                          />
+                          <SortHeader label="Status" sortKey="status" current={sortKey} dir={sortDir} onSort={handleSort} />
                         )}
                       </TableHead>
+                      <TableHead className="text-white/50">Cobrança</TableHead>
                       <TableHead className="text-right text-white/50">
                         {reorderMode ? (
                           <span className="font-semibold text-white/50">Ticket</span>
                         ) : (
-                          <SortHeader
-                            label="Ticket"
-                            sortKey="avg_ticket"
-                            current={sortKey}
-                            dir={sortDir}
-                            onSort={handleSort}
-                          />
+                          <SortHeader label="Ticket" sortKey="avg_ticket" current={sortKey} dir={sortDir} onSort={handleSort} />
                         )}
                       </TableHead>
                       <TableHead className="text-white/50">Tiers</TableHead>
-                      <TableHead className="text-white/50">B2B</TableHead>
-                      <TableHead className="text-white/50">B2C</TableHead>
                       <TableHead className="text-white/50">DIAP</TableHead>
-                      <TableHead className="text-white/50">Por</TableHead>
                       {!reorderMode && <TableHead className="w-10" />}
                     </TableRow>
                   </TableHeader>
                   {reorderMode ? (
-                    <SortableContext
-                      items={rows.map((p) => p.id)}
-                      strategy={verticalListSortingStrategy}
-                    >
+                    <SortableContext items={filtered.map((p) => p.id)} strategy={verticalListSortingStrategy}>
                       <TableBody>
-                        {rows.map((product) => (
+                        {filtered.map((product) => (
                           <SortableRow
                             key={product.id}
                             product={product}
                             tierMap={tierMap}
                             diapByProduct={diapByProduct}
+                            subcatMap={subcatMap}
+                            catMap={catMap}
+                            showCategory={showCategoryCol}
                             onEdit={openEdit}
                           />
                         ))}
                       </TableBody>
                     </SortableContext>
-                  ) : (
+                  ) : grouped ? (
                     <TableBody>
-                      {rows.map((product) => (
-                        <TableRow
-                          key={product.id}
-                          onClick={() => openEdit(product.id)}
-                          className="group cursor-pointer border-white/5 transition-colors hover:bg-white/5"
-                        >
-                          <RowCells
-                            product={product}
-                            tierMap={tierMap}
-                            diapByProduct={diapByProduct}
-                            reorderMode={false}
-                            onEdit={openEdit}
-                          />
-                        </TableRow>
+                      {grouped.map(([groupName, list]) => (
+                        <>
+                          <TableRow key={`g-${groupName}`} className="border-white/5 bg-white/[0.02] hover:bg-white/[0.02]">
+                            <TableCell colSpan={colCount + 1} className="py-2 text-[11px] font-semibold uppercase tracking-wider text-white/40">
+                              {groupName} <span className="ml-2 text-white/30">({list.length})</span>
+                            </TableCell>
+                          </TableRow>
+                          {renderRows(list)}
+                        </>
                       ))}
                     </TableBody>
+                  ) : (
+                    <TableBody>{renderRows(filtered)}</TableBody>
                   )}
                 </Table>
               )}
@@ -647,9 +794,7 @@ export function ProductsTable() {
                       <GripVertical className="h-4 w-4 text-white/40" />
                     </td>
                     <td className="px-4 py-2 text-base">{activeProduct.icon}</td>
-                    <td className="px-4 py-2 font-medium text-white">
-                      {activeProduct.name}
-                    </td>
+                    <td className="px-4 py-2 font-medium text-white">{activeProduct.name}</td>
                   </tr>
                 </tbody>
               </table>
@@ -661,10 +806,13 @@ export function ProductsTable() {
       <ProductDrawer
         mode={drawerMode}
         product={editingProduct}
+        defaultCategoryId={defaultCategoryIdForCreate}
         tiers={tiers}
         onClose={closeDrawer}
         variant="dialog"
       />
+
+      <CategoryManagerDrawer open={managerOpen} onClose={() => setManagerOpen(false)} />
     </>
   );
 }
