@@ -12,10 +12,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { ProductFormData, Tier } from "@/types/scale";
+import type { BillingType, ProductFormData, Tier } from "@/types/scale";
 import { STATUS_OPTIONS } from "@/hooks/useScale";
 import { GROUP_ORDER, type LadderTrack } from "@/hooks/useLadder";
 import { DIAP_COLUMNS } from "@/hooks/useDiap";
+import {
+  useCategories,
+  useSubcategories,
+  useCreateSubcategory,
+} from "@/hooks/useCategories";
 
 const EMPTY: ProductFormData = {
   name: "",
@@ -31,6 +36,9 @@ const EMPTY: ProductFormData = {
   ladder_order: null,
   created_by: "",
   diap_columns: [],
+  category_id: null,
+  subcategory_id: null,
+  billing_type: null,
 };
 
 interface Props {
