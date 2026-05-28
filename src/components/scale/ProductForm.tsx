@@ -62,6 +62,11 @@ export function ProductForm({
 }: Props) {
   const [form, setForm] = useState<ProductFormData>({ ...EMPTY, ...initial });
   const [newScope, setNewScope] = useState("");
+  const [newSubcatName, setNewSubcatName] = useState("");
+
+  const { data: categories = [] } = useCategories();
+  const { data: subcategories = [] } = useSubcategories();
+  const createSubcat = useCreateSubcategory();
 
   useEffect(() => {
     setForm({ ...EMPTY, ...initial });
@@ -71,6 +76,21 @@ export function ProductForm({
     k: K,
     v: ProductFormData[K],
   ) => setForm((f) => ({ ...f, [k]: v }));
+
+  const filteredSubcats = form.category_id
+    ? subcategories.filter((s) => s.category_id === form.category_id)
+    : [];
+
+  const handleAddSubcategory = async () => {
+    const name = newSubcatName.trim();
+    if (!name || !form.category_id) return;
+    const created = await createSubcat.mutateAsync({
+      category_id: form.category_id,
+      name,
+    });
+    update("subcategory_id", created.id);
+    setNewSubcatName("");
+  };
 
   const addScope = () => {
     const v = newScope.trim();
