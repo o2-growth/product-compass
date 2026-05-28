@@ -1,5 +1,20 @@
 export type ProductStatus = "active" | "development" | "planned";
 export type LadderTrack = "b2b" | "b2c";
+export type BillingType = "pontual" | "recorrente";
+
+export interface Category {
+  id: string;
+  name: string;
+  order_index: number;
+  color: string | null;
+}
+
+export interface Subcategory {
+  id: string;
+  category_id: string;
+  name: string;
+  order_index: number;
+}
 
 export interface Tier {
   id: string;
