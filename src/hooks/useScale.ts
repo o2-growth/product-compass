@@ -93,6 +93,9 @@ function isMissingColumn(err: any, col: string) {
 }
 
 export function useCreateProduct() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (form: ProductFormData) => {
       const base: any = {
         name: form.name,
         description: form.description || null,
