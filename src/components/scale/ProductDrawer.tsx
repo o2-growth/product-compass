@@ -19,6 +19,12 @@ import {
   useDeleteProduct,
   useUpdateProduct,
 } from "@/hooks/useScale";
+import {
+  useAddDiapPlacement,
+  useDiap,
+  useRemoveDiapPlacement,
+  type DiapColumn,
+} from "@/hooks/useDiap";
 interface Props {
   mode: "create" | "edit" | null;
   product?: Product;
