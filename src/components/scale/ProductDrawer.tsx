@@ -45,19 +45,6 @@ export function ProductDrawer({
   onClose,
   variant = "sheet",
 }: Props) {
-}
-
-export function ProductDrawer({
-  mode,
-  product,
-  defaultTierId,
-  defaultLadderTrack,
-  defaultLadderGroup,
-  defaultStatus,
-  tiers,
-  onClose,
-  variant = "sheet",
-}: Props) {
   const create = useCreateProduct();
   const update = useUpdateProduct();
   const del = useDeleteProduct();
