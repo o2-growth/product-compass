@@ -19,13 +19,6 @@ import {
   useDeleteProduct,
   useUpdateProduct,
 } from "@/hooks/useScale";
-import {
-  useAddDiapPlacement,
-  useDiap,
-  useRemoveDiapPlacement,
-  type DiapColumn,
-} from "@/hooks/useDiap";
-
 interface Props {
   mode: "create" | "edit" | null;
   product?: Product;
@@ -33,10 +26,25 @@ interface Props {
   defaultLadderTrack?: "b2b" | "b2c" | null;
   defaultLadderGroup?: string;
   defaultStatus?: import("@/types/scale").ProductStatus;
+  defaultCategoryId?: string;
   tiers: Tier[];
   onClose: () => void;
   /** "sheet" (padrão) = painel lateral · "dialog" = modal centralizado */
   variant?: "sheet" | "dialog";
+}
+
+export function ProductDrawer({
+  mode,
+  product,
+  defaultTierId,
+  defaultLadderTrack,
+  defaultLadderGroup,
+  defaultStatus,
+  defaultCategoryId,
+  tiers,
+  onClose,
+  variant = "sheet",
+}: Props) {
 }
 
 export function ProductDrawer({
