@@ -155,6 +155,107 @@ export function ProductForm({
           </div>
         </div>
 
+        <div className="rounded-lg border bg-muted/30 p-3">
+          <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Categoria & Cobrança
+          </Label>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            <div>
+              <Label className="text-xs">Categoria</Label>
+              <Select
+                value={form.category_id ?? "none"}
+                onValueChange={(v) => {
+                  const next = v === "none" ? null : v;
+                  update("category_id", next);
+                  update("subcategory_id", null);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Categoria" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Sem categoria</SelectItem>
+                  {categories.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-xs">Subcategoria</Label>
+              <Select
+                value={form.subcategory_id ?? "none"}
+                onValueChange={(v) =>
+                  update("subcategory_id", v === "none" ? null : v)
+                }
+                disabled={!form.category_id}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Subcategoria" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Sem subcategoria</SelectItem>
+                  {filteredSubcats.map((s) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          {form.category_id && (
+            <div className="mt-2 flex gap-2">
+              <Input
+                placeholder="+ Nova subcategoria"
+                value={newSubcatName}
+                onChange={(e) => setNewSubcatName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleAddSubcategory();
+                  }
+                }}
+                className="h-8 text-xs"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleAddSubcategory}
+                disabled={!newSubcatName.trim() || createSubcat.isPending}
+              >
+                <Plus className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          )}
+          <div className="mt-3">
+            <Label className="text-xs">Tipo de cobrança</Label>
+            <div className="mt-1 flex gap-2">
+              {([
+                { v: null, label: "Não definido" },
+                { v: "pontual", label: "Pontual" },
+                { v: "recorrente", label: "Recorrente" },
+              ] as { v: BillingType | null; label: string }[]).map((opt) => (
+                <button
+                  key={opt.label}
+                  type="button"
+                  onClick={() => update("billing_type", opt.v)}
+                  className={`flex-1 rounded-md border px-2 py-1.5 text-xs transition-colors ${
+                    form.billing_type === opt.v
+                      ? "border-accent bg-accent/20 text-accent"
+                      : "border-white/15 text-white/60 hover:border-white/30"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
         <div>
           <Label htmlFor="desc">Descrição</Label>
           <Textarea
