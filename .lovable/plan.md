@@ -1,41 +1,75 @@
 ## Objetivo
 
-Permitir arrastar cards dentro de cada coluna da página `/products` pra reordenar visualmente, persistindo a ordem no banco.
+Organizar o portfólio por **Categoria → Subcategoria**, com gestão própria e tipo de cobrança **Pontual/Recorrente**, mantendo Produtos como fonte única de verdade (Ladder e DIAP continuam refletindo).
 
-## Escopo
+## Modelagem no banco
 
-- Arrasto **só dentro do mesmo bucket** (Ativos, Em planejamento, Novos, Futuros). Não muda status — pra trocar de bucket, o usuário continua usando o drawer/sidebar.
-- Persiste em `products.position_index`, mesmo campo que já ordena `useProducts()`.
+Três mudanças no schema:
 
-## Estratégia de persistência
+1. **`categories`** (editável pelo usuário)
+   - `name`, `order_index`, `color`
 
-Ao reordenar um bucket, pegamos os `position_index` atuais dos cards visíveis daquele bucket e **reatribuímos** os mesmos valores na nova ordem. Vantagens:
-- Não mexe nas posições de produtos de outros buckets (mantém intercalação global).
-- Update curto (só os N produtos da coluna), sem renumeração global.
+2. **`subcategories`** (vinculadas a uma categoria)
+   - `category_id` (FK → categories, ON DELETE CASCADE)
+   - `name`, `order_index`
+   - UNIQUE (category_id, name)
 
-Exemplo: bucket tem [A=3, B=7, C=10]. Usuário move C pro topo → escrita: C.position_index=3, A=7, B=10.
+3. **`products`** ganha 3 colunas:
+   - `category_id` (FK → categories, ON DELETE SET NULL)
+   - `subcategory_id` (FK → subcategories, ON DELETE SET NULL)
+   - `billing_type` TEXT — valores `pontual` | `recorrente` | `null`
 
-## Mudanças
+Seed inicial com as 5 categorias do print (CAAS, SAAS, Education, Expansão, Eventos) e respectivas subcategorias (Enterprise, Corporate, Serviços Especiais, BPO Financeiro, Coordenador as a Service, Oxy, Oxy+Gênio, Setup, Engenheiro de Negócios, Financeiro Raiz, Dono CFO, Sales Finance Program, Franquia, Oxy Hacker, Macro Franquia, G4).
 
-### 1. `src/hooks/useScale.ts`
-Adicionar `useReorderProducts()`:
-- Recebe `Array<{ id: string; position_index: number }>`.
-- Faz updates em paralelo (`Promise.all` de `supabase.from("products").update({position_index}).eq("id", id)`).
-- Optimistic update na cache `["products"]` pra UI não piscar.
-- Invalida `["products"]` no `onSettled`.
+GRANTs + RLS público (mesmo padrão das outras tabelas do projeto).
 
-### 2. `src/components/products/ProductsOverview.tsx`
-- Envolver tudo em `<DndContext>` com `PointerSensor` (mesma config do DIAP).
-- Cada `BucketColumn` vira um `<SortableContext items={ids} strategy={verticalListSortingStrategy}>`.
-- `ProductCard` usa `useSortable({ id: product.id })` — aplica `transform`/`transition`, `attributes`/`listeners` no card inteiro (cursor `grab`).
-- `id` do sortable inclui prefixo do bucket (ex: `active:uuid`) pra evitar colisão entre colunas, e o `onDragEnd` só processa quando origem e destino estão no mesmo bucket.
-- Após reorder local (via `arrayMove`), chama `reorder.mutate(...)` com as novas posições.
+## Página Produtos — nova UI
 
-### 3. Detalhes visuais
-- Card ganha `cursor-grab active:cursor-grabbing`.
-- Enquanto arrastando (`isDragging`), aplicar `opacity-50` e `z-10` no clone.
-- Ícone sutil de "drag handle" (≡) no canto do card como dica visual — opcional, mas ajuda descoberta.
+Reorganização da rota `/products`:
 
-## Resultado
+- **Abas no topo**: `Todas` · `CAAS` · `SAAS` · `Education` · `Expansão` · `Eventos` (geradas dinamicamente a partir da tabela `categories`, ordenadas por `order_index`).
+- Dentro de cada aba, tabela com colunas:
+  `Ícone · Nome · Subcategoria · Status · Cobrança (Pontual/Recorrente) · Ticket · Tiers · Ladder · DIAP · Ações`
+- **Filtros acima da tabela**: Status, Subcategoria (filtrada pela categoria ativa), Cobrança.
+- **Agrupamento opcional** por Subcategoria (toggle), igual ao print.
+- Aba `Todas` mostra coluna extra `Categoria`.
 
-Na página `/products`, o usuário arrasta um card pra cima/baixo dentro da coluna; a ordem se mantém na próxima visita e também afeta a ordem padrão de `useProducts()` (sidebar do DIAP, etc.) já que tudo lê de `position_index`.
+## Formulário do Produto (ProductDrawer)
+
+Novos campos no `ProductForm`:
+
+- **Categoria** (select de `categories`)
+- **Subcategoria** (select dependente — só lista subcategorias da categoria escolhida; permite criar nova inline com botão "+ Nova subcategoria")
+- **Cobrança**: radio `Pontual` / `Recorrente` / `Não definido`
+
+Quando o usuário escolhe categoria, o select de subcategoria recarrega. Mudança de categoria limpa subcategoria.
+
+## Gestão de Categorias
+
+Pequena seção na própria página Produtos (botão "Gerenciar categorias" no header da aba), abrindo um drawer com:
+
+- Lista de categorias com drag para reordenar, renomear inline, excluir.
+- Dentro de cada categoria, lista de subcategorias (renomear/excluir/adicionar).
+- Excluir categoria com produtos vinculados: confirma e os produtos ficam com `category_id = NULL` (vão para aba "Sem categoria").
+
+## Reflexo nas outras páginas
+
+- **Value Ladder e DIAP**: continuam puxando do mesmo `products`. Cards passam a exibir um badge pequeno com a **subcategoria** (opcional, sutil) e ícone de Pontual/Recorrente.
+- Nenhuma duplicação de dado — Produtos permanece a fonte única.
+
+## Detalhes técnicos
+
+- Novos hooks: `useCategories`, `useSubcategories(categoryId)`, mutações CRUD.
+- `useScale` (products) atualizado para retornar `category_id`, `subcategory_id`, `billing_type` e fazer JOIN com nomes para exibição.
+- Tipos em `src/types/scale.ts` recebem os novos campos + tipo `BillingType = "pontual" | "recorrente"`.
+- Aba ativa controlada por search param `?cat=<slug>` (TanStack zod adapter) para deep-link.
+- Seed das categorias/subcategorias roda na migration. Tentativa de auto-vincular produtos existentes por nome de subcategoria (best-effort, o resto fica sem categoria para o usuário ajustar).
+
+## Ordem de execução
+
+1. Migration: tabelas + colunas + seed + tentativa de auto-vínculo.
+2. Hooks de categorias/subcategorias + atualização de `useScale`.
+3. Atualizar `ProductForm` e `ProductDrawer` com os novos campos.
+4. Reescrever `ProductsTable` com abas + filtros + agrupamento por subcategoria.
+5. Drawer de "Gerenciar categorias".
+6. Badges sutis de subcategoria/cobrança em Ladder e DIAP.
