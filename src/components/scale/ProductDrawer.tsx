@@ -96,7 +96,6 @@ export function ProductDrawer({
             ...(defaultStatus ? { status: defaultStatus } : {}),
           }
         : undefined;
-        : undefined;
 
   const handleSubmit = async (form: ProductFormData) => {
     let productId: string;
