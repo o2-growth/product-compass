@@ -1,75 +1,55 @@
 ## Objetivo
 
-Organizar o portfólio por **Categoria → Subcategoria**, com gestão própria e tipo de cobrança **Pontual/Recorrente**, mantendo Produtos como fonte única de verdade (Ladder e DIAP continuam refletindo).
+O PDF "Oxy Hacker - Produtos" cobre 3 blocos: **CAAS**, **SAAS** e **Diagnóstico Estratégico** (Serviço Especial). Vou usar o conteúdo do PDF para enriquecer descrições e classificar os produtos já cadastrados — sem criar produtos novos além dos que o PDF realmente descreve.
 
-## Modelagem no banco
+## O que o PDF traz
 
-Três mudanças no schema:
+| Bloco | Subcategorias / variações no PDF | Já existe no app? |
+|---|---|---|
+| **CAAS** | Enterprise, Corporate | ✅ subcategorias já criadas; produto "CFO as a Service (CaaS)" existe |
+| **SAAS** | Setup, Oxy (plataforma), Oxy+Gênio, Oxy+Gênio+Especialista | ✅ subcategorias já criadas; "Setup" e "Oxy Finance® + Gênio®" existem; **falta** "SAAS + Especialista" |
+| **Serviços Especiais** | Diagnóstico Estratégico | ✅ produto existe, mas sem categoria |
 
-1. **`categories`** (editável pelo usuário)
-   - `name`, `order_index`, `color`
+## Mudanças propostas (data-only — sem migration de schema)
 
-2. **`subcategories`** (vinculadas a uma categoria)
-   - `category_id` (FK → categories, ON DELETE CASCADE)
-   - `name`, `order_index`
-   - UNIQUE (category_id, name)
+Tudo via `INSERT/UPDATE` na tabela `products`. Nada de novo no schema.
 
-3. **`products`** ganha 3 colunas:
-   - `category_id` (FK → categories, ON DELETE SET NULL)
-   - `subcategory_id` (FK → subcategories, ON DELETE SET NULL)
-   - `billing_type` TEXT — valores `pontual` | `recorrente` | `null`
+### 1. Atualizar produtos existentes
 
-Seed inicial com as 5 categorias do print (CAAS, SAAS, Education, Expansão, Eventos) e respectivas subcategorias (Enterprise, Corporate, Serviços Especiais, BPO Financeiro, Coordenador as a Service, Oxy, Oxy+Gênio, Setup, Engenheiro de Negócios, Financeiro Raiz, Dono CFO, Sales Finance Program, Franquia, Oxy Hacker, Macro Franquia, G4).
+Para cada produto abaixo: setar `description` (rico, baseado em "O que é" + "Qual dor resolve" do PDF), `scope_items` (escopo contratual em bullets), `category_id`, `subcategory_id` e `billing_type`.
 
-GRANTs + RLS público (mesmo padrão das outras tabelas do projeto).
+- **CFO as a Service (CaaS)** → CAAS / Enterprise / `recorrente`
+  - Descrição cobre as duas variações (Enterprise = padrão vendido com SaaS; Corporate = ticket maior, personalizável)
+  - Escopo: 17 itens (Disponibilidade diária, Reunião fixa semanal, Comitê estratégico mensal, DRE, Fluxo de Caixa, Ciclo Financeiro, captação, reestruturação de passivos, etc.)
 
-## Página Produtos — nova UI
+- **Setup** → SAAS / Setup / `pontual`
+  - Descrição: implementação do financeiro estratégico (processos, dados, tecnologia) — 90 dias
+  - Escopo: estudo prévio, mapeamento de dados, plano de contas, faturamento, contas a pagar/receber, conciliação bancária, CPV/CMV, integração ERP↔Oxy, validação, treinamento
 
-Reorganização da rota `/products`:
+- **Oxy Finance® + Gênio®** → SAAS / Oxy+Gênio / `recorrente`
+  - Descrição: plataforma proprietária (5 anos, +3MM investidos, 50+ CFOs) + Gênio (CFO 24/7)
+  - Escopo: DRE, Fluxo de Caixa, Ciclo Financeiro (PMP/PME/PMR), Planejamento Orçamentário, Agente IA Gênio
 
-- **Abas no topo**: `Todas` · `CAAS` · `SAAS` · `Education` · `Expansão` · `Eventos` (geradas dinamicamente a partir da tabela `categories`, ordenadas por `order_index`).
-- Dentro de cada aba, tabela com colunas:
-  `Ícone · Nome · Subcategoria · Status · Cobrança (Pontual/Recorrente) · Ticket · Tiers · Ladder · DIAP · Ações`
-- **Filtros acima da tabela**: Status, Subcategoria (filtrada pela categoria ativa), Cobrança.
-- **Agrupamento opcional** por Subcategoria (toggle), igual ao print.
-- Aba `Todas` mostra coluna extra `Categoria`.
+- **Diagnóstico Estratégico** → CAAS / Serviços Especiais / `pontual`
+  - Descrição: diagnóstico econômico-financeiro e operacional + plano de ação (90 dias)
+  - Escopo: 9 etapas (Contexto, Rentabilidade, Eficiência Operacional, NCG, Ciclo Financeiro, Endividamento, Projeções, Problemas/Oportunidades, Plano de Ação)
 
-## Formulário do Produto (ProductDrawer)
+### 2. Criar 1 produto novo
 
-Novos campos no `ProductForm`:
+- **SAAS + Especialista** → SAAS / Oxy+Gênio+Especialista / `recorrente`
+  - Descrição: Oxy + Gênio + encontros semanais (4/mês) com especialista financeiro
+  - Escopo: acesso completo Oxy/Gênio, 4 encontros mensais virtuais agendados, análises baseadas em Oxy/Gênio
 
-- **Categoria** (select de `categories`)
-- **Subcategoria** (select dependente — só lista subcategorias da categoria escolhida; permite criar nova inline com botão "+ Nova subcategoria")
-- **Cobrança**: radio `Pontual` / `Recorrente` / `Não definido`
+### 3. Não mexer (PDF não cobre)
 
-Quando o usuário escolhe categoria, o select de subcategoria recarrega. Mudança de categoria limpa subcategoria.
+Permanecem como estão: Assessoria Financeira, Diagnóstico 360, Dono CFO, Engenheiro de Negócios, Financeiro Raiz, Franquia O2, Master Franquia, O2 Bank, O2 Tax, Oxy Hacker, Turnaround, Valuation.
 
-## Gestão de Categorias
+## Fora de escopo
 
-Pequena seção na própria página Produtos (botão "Gerenciar categorias" no header da aba), abrindo um drawer com:
+- Nenhuma mudança em schema, RLS, UI, hooks ou componentes.
+- Nenhum produto novo além do "SAAS + Especialista" (o PDF não traz outros).
+- Não vou tentar dividir "CaaS" em dois produtos (Enterprise vs Corporate) — o PDF trata como variações do mesmo produto. Se quiser separar depois, é trivial.
 
-- Lista de categorias com drag para reordenar, renomear inline, excluir.
-- Dentro de cada categoria, lista de subcategorias (renomear/excluir/adicionar).
-- Excluir categoria com produtos vinculados: confirma e os produtos ficam com `category_id = NULL` (vão para aba "Sem categoria").
+## Execução
 
-## Reflexo nas outras páginas
-
-- **Value Ladder e DIAP**: continuam puxando do mesmo `products`. Cards passam a exibir um badge pequeno com a **subcategoria** (opcional, sutil) e ícone de Pontual/Recorrente.
-- Nenhuma duplicação de dado — Produtos permanece a fonte única.
-
-## Detalhes técnicos
-
-- Novos hooks: `useCategories`, `useSubcategories(categoryId)`, mutações CRUD.
-- `useScale` (products) atualizado para retornar `category_id`, `subcategory_id`, `billing_type` e fazer JOIN com nomes para exibição.
-- Tipos em `src/types/scale.ts` recebem os novos campos + tipo `BillingType = "pontual" | "recorrente"`.
-- Aba ativa controlada por search param `?cat=<slug>` (TanStack zod adapter) para deep-link.
-- Seed das categorias/subcategorias roda na migration. Tentativa de auto-vincular produtos existentes por nome de subcategoria (best-effort, o resto fica sem categoria para o usuário ajustar).
-
-## Ordem de execução
-
-1. Migration: tabelas + colunas + seed + tentativa de auto-vínculo.
-2. Hooks de categorias/subcategorias + atualização de `useScale`.
-3. Atualizar `ProductForm` e `ProductDrawer` com os novos campos.
-4. Reescrever `ProductsTable` com abas + filtros + agrupamento por subcategoria.
-5. Drawer de "Gerenciar categorias".
-6. Badges sutis de subcategoria/cobrança em Ladder e DIAP.
+1 `supabase--insert` com `UPDATE` dos 4 produtos existentes + `INSERT` do "SAAS + Especialista".
