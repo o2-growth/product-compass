@@ -52,6 +52,9 @@ export function useProducts() {
         ladder_group: p.ladder_group ?? null,
         ladder_order: p.ladder_order ?? null,
         created_by: p.created_by ?? null,
+        category_id: p.category_id ?? null,
+        subcategory_id: p.subcategory_id ?? null,
+        billing_type: p.billing_type ?? null,
         tier_ids: (p.product_tiers ?? [])
           .map((pt: any) => pt.tier_id)
           .filter(Boolean),
