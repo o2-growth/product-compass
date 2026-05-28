@@ -52,6 +52,9 @@ export interface Product {
   ladder_order: number | null;
   created_by: string | null;
   ladder_placements: LadderPlacement[];
+  category_id: string | null;
+  subcategory_id: string | null;
+  billing_type: BillingType | null;
 }
 
 export interface ProductFormData {
@@ -68,6 +71,9 @@ export interface ProductFormData {
   ladder_order: number | null;
   created_by: string;
   diap_columns: string[];
+  category_id: string | null;
+  subcategory_id: string | null;
+  billing_type: BillingType | null;
 }
 
 export const STATUS_LABEL: Record<ProductStatus, string> = {
