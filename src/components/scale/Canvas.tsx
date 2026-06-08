@@ -34,7 +34,7 @@ export function Canvas() {
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<ProductStatus | "all">(
-    "all",
+    "active",
   );
   const [drawerMode, setDrawerMode] = useState<"create" | "edit" | null>(null);
   const [activeId, setActiveId] = useState<string | undefined>();

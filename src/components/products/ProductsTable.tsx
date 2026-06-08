@@ -370,7 +370,7 @@ export function ProductsTable() {
 
   const [activeCategoryId, setActiveCategoryId] = useState<string | "all" | "uncategorized">("all");
   const [query, setQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<ProductStatus | "all">("all");
+  const [statusFilter, setStatusFilter] = useState<ProductStatus | "all">("active");
   const [billingFilter, setBillingFilter] = useState<BillingType | "all" | "none">("all");
   const [subcategoryFilter, setSubcategoryFilter] = useState<string | "all">("all");
   const [groupBySubcat, setGroupBySubcat] = useState(false);
