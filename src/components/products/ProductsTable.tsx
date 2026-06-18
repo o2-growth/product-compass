@@ -167,6 +167,16 @@ function BillingBadge({ type }: { type: BillingType | null }) {
       </Badge>
     );
   }
+  if (type === "ambos") {
+    return (
+      <Badge
+        variant="outline"
+        className="gap-1 border-blue-500/30 bg-blue-500/10 px-1.5 py-0 text-[10px] text-blue-300"
+      >
+        <Repeat className="h-2.5 w-2.5" /> Ambos
+      </Badge>
+    );
+  }
   return (
     <Badge
       variant="outline"
