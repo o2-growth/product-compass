@@ -256,6 +256,7 @@ export function ProductForm({
                 { v: null, label: "Não definido" },
                 { v: "pontual", label: "Pontual" },
                 { v: "recorrente", label: "Recorrente" },
+                { v: "ambos", label: "Ambos" },
               ] as { v: BillingType | null; label: string }[]).map((opt) => (
                 <button
                   key={opt.label}

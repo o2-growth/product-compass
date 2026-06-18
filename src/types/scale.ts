@@ -1,6 +1,6 @@
 export type ProductStatus = "active" | "development" | "planned";
 export type LadderTrack = "b2b" | "b2c";
-export type BillingType = "pontual" | "recorrente";
+export type BillingType = "pontual" | "recorrente" | "ambos";
 
 export interface Category {
   id: string;
