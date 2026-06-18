@@ -129,6 +129,24 @@ export function ProductForm({
     onSubmit({ ...form, name: form.name.trim() });
   };
 
+  const formatCurrency = (n: number | null) => {
+    if (n === null) return null;
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+      maximumFractionDigits: 0,
+    }).format(n);
+  };
+
+  const tierLabel = (t: Tier) => {
+    const parts = [formatCurrency(t.min_revenue), formatCurrency(t.max_revenue)].filter(Boolean);
+    let range = "";
+    if (parts.length === 2) range = `${parts[0]} - ${parts[1]}`;
+    else if (parts.length === 1 && t.min_revenue !== null) range = `a partir de ${parts[0]}`;
+    else if (parts.length === 1 && t.max_revenue !== null) range = `até ${parts[0]}`;
+    return range ? `${t.name} (${range})` : t.name;
+  };
+
   return (
     <form onSubmit={submit} className="flex min-h-0 flex-1 flex-col">
       <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-5">
@@ -352,7 +370,7 @@ export function ProductForm({
                   checked={form.tier_ids.includes(t.id)}
                   onCheckedChange={() => toggleTier(t.id)}
                 />
-                <span className="truncate">{t.name}</span>
+                <span className="truncate">{tierLabel(t)}</span>
               </label>
             ))}
           </div>
