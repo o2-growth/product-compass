@@ -140,7 +140,10 @@ export function ProductForm({
 
   const tierLabel = (t: Tier) => {
     const parts = [formatCurrency(t.min_revenue), formatCurrency(t.max_revenue)].filter(Boolean);
-    const range = parts.length === 2 ? `${parts[0]} - ${parts[1]}` : parts[0] ? `a partir de ${parts[0]}` : parts[0] ? `até ${parts[0]}` : "";
+    let range = "";
+    if (parts.length === 2) range = `${parts[0]} - ${parts[1]}`;
+    else if (parts.length === 1 && t.min_revenue !== null) range = `a partir de ${parts[0]}`;
+    else if (parts.length === 1 && t.max_revenue !== null) range = `até ${parts[0]}`;
     return range ? `${t.name} (${range})` : t.name;
   };
 
