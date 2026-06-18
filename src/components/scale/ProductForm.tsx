@@ -129,6 +129,21 @@ export function ProductForm({
     onSubmit({ ...form, name: form.name.trim() });
   };
 
+  const formatCurrency = (n: number | null) => {
+    if (n === null) return null;
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+      maximumFractionDigits: 0,
+    }).format(n);
+  };
+
+  const tierLabel = (t: Tier) => {
+    const parts = [formatCurrency(t.min_revenue), formatCurrency(t.max_revenue)].filter(Boolean);
+    const range = parts.length === 2 ? `${parts[0]} - ${parts[1]}` : parts[0] ? `a partir de ${parts[0]}` : parts[0] ? `até ${parts[0]}` : "";
+    return range ? `${t.name} (${range})` : t.name;
+  };
+
   return (
     <form onSubmit={submit} className="flex min-h-0 flex-1 flex-col">
       <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-5">
