@@ -1,0 +1,2 @@
+ALTER TABLE public.products DROP CONSTRAINT IF EXISTS products_billing_type_check;
+ALTER TABLE public.products ADD CONSTRAINT products_billing_type_check CHECK (billing_type IN ('pontual','recorrente','ambos'));
