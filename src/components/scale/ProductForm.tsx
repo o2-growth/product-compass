@@ -370,7 +370,7 @@ export function ProductForm({
                   checked={form.tier_ids.includes(t.id)}
                   onCheckedChange={() => toggleTier(t.id)}
                 />
-                <span className="truncate">{t.name}</span>
+                <span className="truncate">{tierLabel(t)}</span>
               </label>
             ))}
           </div>
