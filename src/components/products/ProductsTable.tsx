@@ -85,6 +85,7 @@ const BILLING_FILTER: { value: BillingType | "all" | "none"; label: string }[] =
   { value: "all", label: "Todas cobranças" },
   { value: "pontual", label: "Pontual" },
   { value: "recorrente", label: "Recorrente" },
+  { value: "ambos", label: "Ambos" },
   { value: "none", label: "Sem cobrança" },
 ];
 
