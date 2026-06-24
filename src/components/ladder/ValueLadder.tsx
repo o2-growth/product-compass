@@ -20,6 +20,23 @@ import {
 import { arrayMove } from "@dnd-kit/sortable";
 import { ProductDrawer } from "@/components/scale/ProductDrawer";
 import { LadderStep, getStepLefts, getStepWidth, STEP_DELTA_Y } from "./LadderStep";
+import { User, Users, UsersRound } from "lucide-react";
+
+function formatBRL(value: number): string {
+  if (value >= 1_000_000) return `~R$ ${(value / 1_000_000).toFixed(2).replace(".", ",")}M`;
+  if (value >= 1_000) return `R$ ${(value / 1_000).toFixed(0)}k`;
+  return `R$ ${value.toLocaleString("pt-BR")}`;
+}
+
+function AudienceLegend() {
+  return (
+    <div className="flex flex-wrap items-center gap-3 rounded-full bg-black/50 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-white/90 shadow">
+      <span className="inline-flex items-center gap-1.5"><User className="h-3.5 w-3.5" /> C-level</span>
+      <span className="inline-flex items-center gap-1.5"><Users className="h-3.5 w-3.5" /> Liderança</span>
+      <span className="inline-flex items-center gap-1.5"><UsersRound className="h-3.5 w-3.5" /> Time</span>
+    </div>
+  );
+}
 import { ProductsSidebar } from "./ProductsSidebar";
 import { AppShell, FooterDot } from "@/components/shell/AppShell";
 import { cn } from "@/lib/utils";
