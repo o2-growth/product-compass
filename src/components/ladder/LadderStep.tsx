@@ -94,25 +94,13 @@ export function paletteForStep(stepIndex: number, total: number): StepPalette {
   return PALETTES.blue;
 }
 
-/** Mapeia o nome do grupo a um conjunto de personas (C-level, Liderança, Time). */
-function audienceForGroup(name: string): Array<"c" | "l" | "t"> {
-  const n = name.toLowerCase();
-  // Heurística simples: produtos premium / consultoria → C-level + Liderança
-  if (/(consult|club|scale|special|master|sprint|mentoring|sprints)/.test(n)) return ["c", "l"];
-  if (/(franquia|gestão|gestao|assessoria|founder|traction|estrat)/.test(n)) return ["c", "l"];
-  if (/(profission|academ|skills|educa|cx|sales|mkt|mark|pessoas|sucess)/.test(n)) return ["l", "t"];
-  if (/(free|conteúdo|conteudo|curso|gravad|fnn|fg4)/.test(n)) return ["t"];
-  return ["l"];
-}
-
-function AudienceIcons({ list, color }: { list: Array<"c" | "l" | "t">; color: string }) {
-  return (
-    <div className="flex items-center gap-1" style={{ color }}>
-      {list.includes("c") && <User className="h-3.5 w-3.5" aria-label="C-level" />}
-      {list.includes("l") && <Users className="h-3.5 w-3.5" aria-label="Liderança" />}
-      {list.includes("t") && <UsersRound className="h-3.5 w-3.5" aria-label="Time" />}
-    </div>
-  );
+/** Estágio da jornada do cliente conforme posição na escada. */
+function stageForStep(stepIndex: number, total: number): { label: string; Icon: typeof Sparkles } {
+  if (total <= 1) return { label: "Entrada", Icon: Sparkles };
+  const ratio = stepIndex / Math.max(total - 1, 1);
+  if (ratio < 0.34) return { label: "Entrada", Icon: Sparkles };
+  if (ratio < 0.7) return { label: "Crescimento", Icon: TrendingUp };
+  return { label: "Premium", Icon: Crown };
 }
 
 export interface LadderStepProps {
