@@ -1,4 +1,4 @@
-import { ChevronRight, Plus, GripVertical, X, User, Users, UsersRound } from "lucide-react";
+import { ChevronRight, Plus, GripVertical, X, Sparkles, TrendingUp, Crown } from "lucide-react";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@/lib/utils";
@@ -94,25 +94,13 @@ export function paletteForStep(stepIndex: number, total: number): StepPalette {
   return PALETTES.blue;
 }
 
-/** Mapeia o nome do grupo a um conjunto de personas (C-level, Liderança, Time). */
-function audienceForGroup(name: string): Array<"c" | "l" | "t"> {
-  const n = name.toLowerCase();
-  // Heurística simples: produtos premium / consultoria → C-level + Liderança
-  if (/(consult|club|scale|special|master|sprint|mentoring|sprints)/.test(n)) return ["c", "l"];
-  if (/(franquia|gestão|gestao|assessoria|founder|traction|estrat)/.test(n)) return ["c", "l"];
-  if (/(profission|academ|skills|educa|cx|sales|mkt|mark|pessoas|sucess)/.test(n)) return ["l", "t"];
-  if (/(free|conteúdo|conteudo|curso|gravad|fnn|fg4)/.test(n)) return ["t"];
-  return ["l"];
-}
-
-function AudienceIcons({ list, color }: { list: Array<"c" | "l" | "t">; color: string }) {
-  return (
-    <div className="flex items-center gap-1" style={{ color }}>
-      {list.includes("c") && <User className="h-3.5 w-3.5" aria-label="C-level" />}
-      {list.includes("l") && <Users className="h-3.5 w-3.5" aria-label="Liderança" />}
-      {list.includes("t") && <UsersRound className="h-3.5 w-3.5" aria-label="Time" />}
-    </div>
-  );
+/** Estágio da jornada do cliente conforme posição na escada. */
+function stageForStep(stepIndex: number, total: number): { label: string; Icon: typeof Sparkles } {
+  if (total <= 1) return { label: "Entrada", Icon: Sparkles };
+  const ratio = stepIndex / Math.max(total - 1, 1);
+  if (ratio < 0.34) return { label: "Entrada", Icon: Sparkles };
+  if (ratio < 0.7) return { label: "Crescimento", Icon: TrendingUp };
+  return { label: "Premium", Icon: Crown };
 }
 
 export interface LadderStepProps {
@@ -235,7 +223,7 @@ export function LadderStep({
   const subtitle = TRACK_SUBTITLE[track]?.[group.name];
   const renameGroup = useRenameLadderGroup();
   const palette = paletteForStep(stepIndex, totalSteps);
-  const audience = audienceForGroup(group.name);
+  const stage = stageForStep(stepIndex, totalSteps);
 
   const tiles = group.products.length;
   const cols = Math.min(MAX_PER_ROW, Math.max(tiles, 1));
@@ -258,7 +246,11 @@ export function LadderStep({
         className="mb-1 inline-flex items-center gap-2 rounded-md px-2.5 py-1 shadow-sm"
         style={{ background: palette.titlePill, color: palette.titlePillText }}
       >
-        <AudienceIcons list={audience} color={palette.iconColor} />
+        <stage.Icon className="h-3.5 w-3.5" style={{ color: palette.iconColor }} aria-hidden />
+        <span className="text-[10px] font-semibold uppercase tracking-[0.14em] opacity-90">
+          {stage.label}
+        </span>
+        <span className="opacity-40">·</span>
         <h3 className="text-[12px] font-bold uppercase tracking-wide">
           <EditableText
             value={group.name}
