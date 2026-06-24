@@ -8,7 +8,7 @@ import { EditableText } from "@/components/ui/editable-text";
 import { useRenameLadderGroup, useRenameProduct } from "@/hooks/useScale";
 
 const CARD_W = 116;
-const CARD_H = 70;
+const CARD_H = 84;
 const CARD_GAP = 8;
 const PAD = 12;
 const MAX_PER_ROW = 5;
@@ -146,7 +146,7 @@ function DraggableCard({
         boxShadow: "inset 0 1px 0 rgba(255,255,255,0.18), 0 2px 6px rgba(0,0,0,0.25)",
       }}
       className={cn(
-        "group relative flex flex-col rounded-md p-1.5 text-left outline-none transition-transform duration-150",
+        "group relative flex flex-col overflow-hidden rounded-md p-1.5 text-left outline-none transition-transform duration-150",
         !isDragging && "hover:-translate-y-0.5",
       )}
       title={product.name}
@@ -185,25 +185,24 @@ function DraggableCard({
         aria-label={`Abrir ${product.name}`}
       />
 
-      <div className="pointer-events-none relative flex h-full flex-col justify-between p-1">
-        <div className="pointer-events-auto mt-2 px-0.5">
+      <div className="pointer-events-none relative flex h-full flex-col justify-between gap-1 pt-3">
+        <div className="pointer-events-auto min-w-0 px-0.5">
           <EditableText
             value={product.name}
             onSave={(name) => rename.mutateAsync({ id: product.id, name })}
             ariaLabel="Renomear produto"
             as="div"
             clamp
-            className="block w-full text-[11px] font-bold leading-tight"
+            className="block w-full break-words text-[11px] font-bold leading-tight"
             inputClassName="text-[11px] font-bold"
           />
         </div>
         <div
-          className="px-0.5 text-[11px] font-semibold tabular-nums"
+          className="truncate px-0.5 text-[11px] font-semibold tabular-nums"
           style={{ color: palette.ticketText }}
         >
           {formatTicket(product.avg_ticket)}
         </div>
-        <ChevronRight className="absolute bottom-1 right-1 h-3 w-3 text-white/80 opacity-0 transition-opacity duration-150 group-hover:opacity-100" />
       </div>
     </div>
   );
