@@ -1,4 +1,4 @@
-import { ChevronRight, Plus, GripVertical, X, User, Users, UsersRound } from "lucide-react";
+import { ChevronRight, Plus, GripVertical, X, Sparkles, TrendingUp, Crown } from "lucide-react";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@/lib/utils";
