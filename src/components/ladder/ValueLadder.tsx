@@ -488,6 +488,7 @@ export function ValueLadder() {
                         group={g}
                         leftPx={lefts[i]}
                         stepIndex={i}
+                        totalSteps={groups.length}
                         track={track}
                         onOpenProduct={openEdit}
                         onAddProduct={openCreate}
