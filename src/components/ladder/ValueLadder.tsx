@@ -20,6 +20,23 @@ import {
 import { arrayMove } from "@dnd-kit/sortable";
 import { ProductDrawer } from "@/components/scale/ProductDrawer";
 import { LadderStep, getStepLefts, getStepWidth, STEP_DELTA_Y } from "./LadderStep";
+import { User, Users, UsersRound } from "lucide-react";
+
+function formatBRL(value: number): string {
+  if (value >= 1_000_000) return `~R$ ${(value / 1_000_000).toFixed(2).replace(".", ",")}M`;
+  if (value >= 1_000) return `R$ ${(value / 1_000).toFixed(0)}k`;
+  return `R$ ${value.toLocaleString("pt-BR")}`;
+}
+
+function AudienceLegend() {
+  return (
+    <div className="flex flex-wrap items-center gap-3 rounded-full bg-black/50 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-white/90 shadow">
+      <span className="inline-flex items-center gap-1.5"><User className="h-3.5 w-3.5" /> C-level</span>
+      <span className="inline-flex items-center gap-1.5"><Users className="h-3.5 w-3.5" /> Liderança</span>
+      <span className="inline-flex items-center gap-1.5"><UsersRound className="h-3.5 w-3.5" /> Time</span>
+    </div>
+  );
+}
 import { ProductsSidebar } from "./ProductsSidebar";
 import { AppShell, FooterDot } from "@/components/shell/AppShell";
 import { cn } from "@/lib/utils";
@@ -298,6 +315,15 @@ export function ValueLadder() {
     [groups],
   );
 
+  const totalValue = useMemo(
+    () =>
+      groups.reduce(
+        (acc, g) => acc + g.products.reduce((s, p) => s + (p.avg_ticket ?? 0), 0),
+        0,
+      ),
+    [groups],
+  );
+
   // ====== Zoom / Fit-to-screen ======
   const [scale, setScale] = useState(1);
   const [hasAutoFit, setHasAutoFit] = useState(false);
@@ -387,6 +413,28 @@ export function ValueLadder() {
                 {TRACK_TITLE[track]}
               </h2>
 
+              {/* Audience legend (top-left) */}
+              <div className="absolute left-24 top-20">
+                <AudienceLegend />
+              </div>
+
+              {/* Total value summary (top-right) */}
+              <div
+                className="absolute right-12 top-16 flex flex-col items-center rounded-xl px-6 py-3 text-center shadow-lg"
+                style={{
+                  background: "linear-gradient(180deg, #d99553 0%, #b8732e 100%)",
+                  color: "#fff",
+                  boxShadow: "0 12px 30px -12px rgba(0,0,0,0.5)",
+                }}
+              >
+                <span className="text-[11px] font-semibold uppercase tracking-[0.18em] opacity-90">
+                  Valor total dos produtos
+                </span>
+                <span className="font-display text-3xl font-extrabold tabular-nums">
+                  {formatBRL(totalValue)}
+                </span>
+              </div>
+
               {/* Y axis */}
               <div className="absolute bottom-12 left-16 top-20">
                 <div className="relative h-full w-px bg-bg-elev/60">
@@ -440,6 +488,7 @@ export function ValueLadder() {
                         group={g}
                         leftPx={lefts[i]}
                         stepIndex={i}
+                        totalSteps={groups.length}
                         track={track}
                         onOpenProduct={openEdit}
                         onAddProduct={openCreate}
