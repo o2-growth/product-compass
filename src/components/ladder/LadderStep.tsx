@@ -8,7 +8,7 @@ import { EditableText } from "@/components/ui/editable-text";
 import { useRenameLadderGroup, useRenameProduct } from "@/hooks/useScale";
 
 const CARD_W = 116;
-const CARD_H = 84;
+const CARD_H = 96;
 const CARD_GAP = 8;
 const PAD = 12;
 const MAX_PER_ROW = 5;
@@ -185,7 +185,7 @@ function DraggableCard({
         aria-label={`Abrir ${product.name}`}
       />
 
-      <div className="pointer-events-none relative flex h-full flex-col justify-between gap-1 pt-3">
+      <div className="pointer-events-none relative flex h-full flex-col justify-between gap-1 pt-4 pb-1">
         <div className="pointer-events-auto min-w-0 px-0.5">
           <EditableText
             value={product.name}
@@ -198,7 +198,7 @@ function DraggableCard({
           />
         </div>
         <div
-          className="truncate px-0.5 text-[11px] font-semibold tabular-nums"
+          className="shrink-0 truncate px-0.5 text-[11px] font-semibold tabular-nums"
           style={{ color: palette.ticketText }}
         >
           {formatTicket(product.avg_ticket)}
