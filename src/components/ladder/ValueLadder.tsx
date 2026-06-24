@@ -315,6 +315,15 @@ export function ValueLadder() {
     [groups],
   );
 
+  const totalValue = useMemo(
+    () =>
+      groups.reduce(
+        (acc, g) => acc + g.products.reduce((s, p) => s + (p.avg_ticket ?? 0), 0),
+        0,
+      ),
+    [groups],
+  );
+
   // ====== Zoom / Fit-to-screen ======
   const [scale, setScale] = useState(1);
   const [hasAutoFit, setHasAutoFit] = useState(false);
