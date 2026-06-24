@@ -413,6 +413,28 @@ export function ValueLadder() {
                 {TRACK_TITLE[track]}
               </h2>
 
+              {/* Audience legend (top-left) */}
+              <div className="absolute left-24 top-20">
+                <AudienceLegend />
+              </div>
+
+              {/* Total value summary (top-right) */}
+              <div
+                className="absolute right-12 top-16 flex flex-col items-center rounded-xl px-6 py-3 text-center shadow-lg"
+                style={{
+                  background: "linear-gradient(180deg, #d99553 0%, #b8732e 100%)",
+                  color: "#fff",
+                  boxShadow: "0 12px 30px -12px rgba(0,0,0,0.5)",
+                }}
+              >
+                <span className="text-[11px] font-semibold uppercase tracking-[0.18em] opacity-90">
+                  Valor total dos produtos
+                </span>
+                <span className="font-display text-3xl font-extrabold tabular-nums">
+                  {formatBRL(totalValue)}
+                </span>
+              </div>
+
               {/* Y axis */}
               <div className="absolute bottom-12 left-16 top-20">
                 <div className="relative h-full w-px bg-bg-elev/60">
