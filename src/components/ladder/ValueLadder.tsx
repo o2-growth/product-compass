@@ -418,7 +418,7 @@ export function ValueLadder() {
 
               {/* Audience legend (top-left) */}
               <div className="absolute left-24 top-20">
-                <AudienceLegend />
+                <JourneyLegend track={track} />
               </div>
 
               {/* Total value summary (top-right) */}
