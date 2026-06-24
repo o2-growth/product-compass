@@ -246,7 +246,11 @@ export function LadderStep({
         className="mb-1 inline-flex items-center gap-2 rounded-md px-2.5 py-1 shadow-sm"
         style={{ background: palette.titlePill, color: palette.titlePillText }}
       >
-        <AudienceIcons list={audience} color={palette.iconColor} />
+        <stage.Icon className="h-3.5 w-3.5" style={{ color: palette.iconColor }} aria-hidden />
+        <span className="text-[10px] font-semibold uppercase tracking-[0.14em] opacity-90">
+          {stage.label}
+        </span>
+        <span className="opacity-40">·</span>
         <h3 className="text-[12px] font-bold uppercase tracking-wide">
           <EditableText
             value={group.name}
