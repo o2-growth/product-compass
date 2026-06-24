@@ -223,7 +223,7 @@ export function LadderStep({
   const subtitle = TRACK_SUBTITLE[track]?.[group.name];
   const renameGroup = useRenameLadderGroup();
   const palette = paletteForStep(stepIndex, totalSteps);
-  const audience = audienceForGroup(group.name);
+  const stage = stageForStep(stepIndex, totalSteps);
 
   const tiles = group.products.length;
   const cols = Math.min(MAX_PER_ROW, Math.max(tiles, 1));
